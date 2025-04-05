@@ -9,5 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "uuid": "^11.1.0"
+  }
 }
