@@ -168,6 +168,9 @@ importers:
 
   services/engine:
     dependencies:
+      '@repo/order-queue':
+        specifier: workspace:*
+        version: link:../../packages/order-queue
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config

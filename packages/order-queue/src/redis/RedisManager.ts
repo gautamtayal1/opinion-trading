@@ -37,4 +37,12 @@ export class RedisManager {
   public pushMessage( message: any) {
     this.client.lPush("process_orders", JSON.stringify(message))
   }
+
+  public publishToChannel (channel:any, message: any) {
+    this.client.publish(channel, JSON.stringify(message))
+  }
+
+  public publishToUser (channel: any, message: any) {
+    this.client.publish(channel, JSON.stringify(message))
+  }
 }

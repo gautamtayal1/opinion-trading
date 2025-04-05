@@ -16,22 +16,3 @@ export const addToQueue = async(order: any)  => {
     throw error;
   }
 }
-
-// export const processOrderQueue = async() => {
-//   while(true) {
-
-//     try {
-//       console.log("popping")
-//       const order = await client.brPop("ORDER_QUEUE", 0)
-//       if(order) {
-//         const parsedOrder = JSON.parse(order.element)
-        
-//         engine.processOrder(parsedOrder)
-//         console.log(parsedOrder)
-//       }
-//       console.log("popped")
-//     } catch (error) {
-//       console.log(error)
-//     }
-//   }
-// }
