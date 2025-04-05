@@ -4,7 +4,6 @@ import express from "express";
 const app = express()
 const PORT = 8080
 
-// Add middleware to parse JSON request bodies
 app.use(express.json())
 
 app.post("/order", async(req, res) => {

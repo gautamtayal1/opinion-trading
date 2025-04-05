@@ -65,8 +65,10 @@ export class Orderbook {
         const filledQty = Math.min(order.quantity - executedQty, this.asks[i]?.quantity!)
 
         executedQty += filledQty
-        //@ts-ignore
-        this.asks[i]?.filled += filledQty
+        if (this.asks[i]) {
+          //@ts-ignore
+          this.asks[i].filled += filledQty
+        }
         fills.push({
           price: this.asks[i]?.price!,
           qty: filledQty,
@@ -94,8 +96,10 @@ export class Orderbook {
         const filledQty = Math.min(this.bids[i]?.quantity!, order.quantity - executedQty)
 
         executedQty += filledQty
-        //@ts-ignore
-        this.bids[i]?.filled! += filledQty 
+        if (this.bids[i]) {
+          //@ts-ignore
+          this.bids[i].filled += filledQty
+        }
 
         fills.push({
           price: this.bids[i]?.price!,

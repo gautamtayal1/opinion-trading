@@ -7,14 +7,16 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/queue/worker.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "redis": "^4.7.0",
-    "@repo/typescript-config": "workspace:*"
+    "@repo/engine": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "bullmq": "^5.47.1",
+    "redis": "^4.7.0"
   }
 }
