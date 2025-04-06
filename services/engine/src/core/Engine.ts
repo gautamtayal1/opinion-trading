@@ -3,6 +3,7 @@ import fs from "fs"
 import {v4 as uuidv4} from "uuid"
 import { RedisManager } from "@repo/order-queue";
 import path from "path";
+import { orderProcessor } from "@repo/order-queue";
 
 interface UserBalance {
   available: number;
@@ -146,9 +147,9 @@ export class Engine {
     const {executedQty, fills} = orderbook?.addOrder(order)
     console.log(executedQty, fills)
     this.updateBalance(userId, side, fills)
-    // this.createRedisTrade(userId, market, fills)
+    this.createRedisTrade(market, fills)
     // this.updateRedisOrder(order, executedQty, fills, market)
-    // this.publishDepth(fills, price, side, market)
+    this.publishDepth(fills, price, side, market)
     // this.publishTrade(fills, userId, market)
 
     return { executedQty, fills, orderId }
@@ -169,25 +170,55 @@ export class Engine {
     console.log("locked funds")
   }
 
-  updateBalance(userId, side, fills) {
+  updateBalance(
+    userId: string, 
+    side: "yes" | "no", 
+    fills: any
+  ) {
     const userBalance = this.balances.get(userId)
     const otherUserBalance = this.balances.get(fills.otherUserId)
+    const updUserBalance = this.balances.get(userId)?.locked! - (fills.price * fills.qty)
+    const updOtherUserBalance = this.balances.get(fills.otherUserId)?.locked! - (fills.price * fills.qty)
 
-    // if(side === "yes") {
-    //   const makerAvailableBalance = userBalance?.available! - (fills.price * fills.qty)
-    //   const makerLockedBalance = userBalance?.available!  (fills.price * fills.qty)
-    // }
+    if(side === "yes") {
+     this.balances.set(userId, {
+      available: userBalance?.available!,
+      locked: updUserBalance
+     })
+    } else {
+      const 
+    }
   
   }
-  createRedisTrade(userId, market, fills) {
-    
+  createRedisTrade(
+    market: string, 
+    fills: any)
+    {
+    fills.forEach((fill: any) => {
+      orderProcessor.add("process_order",
+        {
+        type: "TRADE_ADDED",
+        data: {
+          market: market,
+          id: fill.tradeId.toString(),
+          price: fill.price,
+          quantity: fill.qty,
+          timestamp: Date.now()
+        }
+      })
+    });
   }
   // updateRedisOrder(order, executedQty, fills, market) {
 
   // }
-  // publishDepth(fills, price, side, market) {
-
-  // }
+  publishDepth(
+    fills: any, 
+    price: number, 
+    side: "yes" | "no", 
+    market: string
+  ) {
+    
+  }
   // publishTrade(fills, userId, market) {
 
   // }
