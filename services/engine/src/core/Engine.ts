@@ -29,10 +29,16 @@ export class Engine {
       this.orderbooks = parsedSnapshot.orderbooks.map((book: any) => {
         return new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
       })
+
+      if (parsedSnapshot.balances && Array.isArray(parsedSnapshot.balances)) {
+        for (const [userId, balance] of parsedSnapshot.balances) {
+          this.balances.set(userId, balance);
+        }
+        console.log("Balances restored from snapshot:", this.balances.size);
+      }
     } else {
       this.orderbooks = [new Orderbook
         ([], [], EXAMPLE_MARKET, 1, 0)]
-      this.setBaseBalance()
     }
     setInterval(() => {
       this.saveSnapshot()
@@ -58,6 +64,8 @@ export class Engine {
 
   processOrder(order: any) {
     console.log("hello from engine")
+    this.setBaseBalance(order.userId)
+    
     switch(order.type){
       case "CREATE_ORDER":
         try {
@@ -109,11 +117,13 @@ export class Engine {
   }
   addOrderbook(orderbook: Orderbook) {
     this.orderbooks.push(orderbook)
+    orderbook.asks.forEach((ask) => this.setBaseBalance(ask.userId))
+    orderbook.bids.forEach((bid) => this.setBaseBalance(bid.userId))
   }
 
   createOrder(
     market: string,
-    price: number, 
+    price: number,
     quantity: number,
     side: "yes" | "no", 
     userId: string
@@ -122,7 +132,7 @@ export class Engine {
     const orderbook = this.orderbooks.find((book) => book.market === market)
     if(!orderbook) throw new Error("orderbook not found")
 
-    // this.checkAndLockFunds()
+    this.checkAndLockFunds(userId, quantity, price)
 
     const orderId = uuidv4()
     const order = {
@@ -135,7 +145,7 @@ export class Engine {
     }
     const {executedQty, fills} = orderbook?.addOrder(order)
     console.log(executedQty, fills)
-    // this.updateBalance(userId, executedQty, fills)
+    this.updateBalance(userId, side, fills)
     // this.createRedisTrade(userId, market, fills)
     // this.updateRedisOrder(order, executedQty, fills, market)
     // this.publishDepth(fills, price, side, market)
@@ -144,16 +154,34 @@ export class Engine {
     return { executedQty, fills, orderId }
   } 
 
-  // checkAndLockFunds() {
+  checkAndLockFunds(userId: string, quantity: number, price: number) {
+    const bal = this.balances.get(userId)
+    const cost = quantity * price
+    if (bal?.available! < cost) {
+      throw new Error('insufficient balance')
+    }
+    const availableBalance = bal?.available! - cost
+    const lockedBalance = bal?.locked! + cost
+    this.balances.set(userId, {
+      available: availableBalance,
+      locked: lockedBalance
+    })
+    console.log("locked funds")
+  }
 
-  // }
+  updateBalance(userId, side, fills) {
+    const userBalance = this.balances.get(userId)
+    const otherUserBalance = this.balances.get(fills.otherUserId)
 
-  // updateBalance(userId, executedQty, fills) {
-
-  // }
-  // createRedisTrade(userId, market, fills) {
-
-  // }
+    // if(side === "yes") {
+    //   const makerAvailableBalance = userBalance?.available! - (fills.price * fills.qty)
+    //   const makerLockedBalance = userBalance?.available!  (fills.price * fills.qty)
+    // }
+  
+  }
+  createRedisTrade(userId, market, fills) {
+    
+  }
   // updateRedisOrder(order, executedQty, fills, market) {
 
   // }
@@ -163,14 +191,15 @@ export class Engine {
   // publishTrade(fills, userId, market) {
 
   // }
-  setBaseBalance() {
-    this.balances.set("1", {
-      available: 10,
-      locked: 10
-    })
-    this.balances.set("2", {
-      available: 10,
-      locked: 10
-    })
+  setBaseBalance(userId: string) {
+    if(!this.balances.has(userId)) {
+      this.balances.set(userId, {
+        available: 1000000,
+        locked: 0
+      })
+    }
   }
+
 }
+
+
