@@ -1,190 +1,202 @@
-import { v4 as uuidv4 } from "uuid" 
+import {v4 as uuidv4} from "uuid"
+const UNIT_VALUE = 10
 
-export interface Order {
-  price: number;
-  quantity: number;
+export interface MarketOrder {
+  price: number;         
+  quantity: number;      
   filled: number;
-  orderId: string;
+  orderId: string;       
   side: "yes" | "no";
   userId: string;
 }
-
 export interface Fill {
-  price: number;
+  price: number;         
   qty: number;
-  tradeId: string;
-  otherUserId: string;
-  marketOrderId: string;
+  tradeId: string;       
+  otherUserId: string;   
+  marketOrderId: string; 
 }
 
 export class Orderbook {
-  bids: Order[];
-  asks: Order[];
+  bids: any[];
+  asks: any[];
   market: string;
   lastTradeId: number;
   currentPrice: number;
 
-  constructor(bids: Order[], asks: Order[], market: string, lastTradeId: number, currentPrice: number) {
+  constructor(
+    bids: any[] = [],
+    asks: any[] = [],
+    market: string = "",
+    lastTradeId: number = 1,
+    currentPrice: number = UNIT_VALUE / 2
+  ) {
     this.bids = bids;
     this.asks = asks;
     this.market = market;
     this.lastTradeId = lastTradeId;
-    this.currentPrice = currentPrice || 0
+    this.currentPrice = currentPrice;
+
+    this.sortOrder()
+  }
+  
+  private sortOrder () {
+    this.bids.sort((a, b) => b.price - a.price)
+    this.asks.sort((a, b) => a.price - b.price)
   }
 
-  addOrder(order: Order) {
-    if(order.side === "yes") {
+  createOrder (order: MarketOrder) {
+    if (order.side === "yes") {
       const {executedQty, fills} = this.matchBid(order)
       order.filled = executedQty
 
-      if (executedQty === order.quantity) {
-        return {
-          executedQty, fills
+      if(executedQty < order.quantity) {
+        this.bids.push({...order, quantity: order.quantity - executedQty, filled: 0})
+        this.sortOrder()
+      }
+
+      if(fills.length > 0) {
+        const lastFill = fills[fills.length - 1]
+        if (lastFill) {
+          this.updateCurrentPrice(lastFill.price)
         }
       }
-      this.bids.push(order)
-      return {executedQty, fills}
+      return { executedQty, fills }
+
     } else {
-        const {executedQty, fills} = this.matchAsk(order)
-        order.filled = executedQty
+      const {executedQty, fills} = this.matchAsk(order)
+      order.filled = executedQty
 
-        if(executedQty === order.quantity){
-          return {executedQty, fills}
+      if(executedQty < order.quantity) {
+        this.asks.push({...order, quantity: order.quantity - executedQty, filled: 0})
+        this.sortOrder()
+      }
+
+      if(fills.length > 0) {
+        const lastFill = fills[fills.length - 1]
+        if(lastFill) {
+          this.updateCurrentPrice(lastFill.price)
         }
-        this.asks.push(order)
-        return {executedQty, fills}
+      }
+      return { executedQty, fills }
     }
   }
 
-  matchBid(order: Order) {
-    const fills: Fill[] = []
+  matchBid (order: MarketOrder) {
+    let fills: Fill[] = []
+    let executedQty = 0
+    
+    for (let i = 0; i < this.asks.length && order.quantity > executedQty; i++) {
+      const ask = this.asks[i]
+      if (order.price + ask?.price === 10) {
+        const tradedQty = Math.min(order.quantity - executedQty, ask.quantity)
+        if (tradedQty === 0) continue
+
+        executedQty += tradedQty
+        ask.filled = tradedQty
+
+        fills.push({
+          price: ask.price,
+          qty: executedQty,
+          otherUserId: ask.userId,
+          tradeId: uuidv4(),
+          marketOrderId: ask.orderId
+        })
+      } 
+    }
+    this.asks = this.asks.filter((ask) => ask.filled < ask.quantity)
+    return {executedQty, fills}
+  }
+
+  matchAsk (order: MarketOrder) {
+    let fills: Fill[] = []
     let executedQty = 0
 
-    for (let i = 0; i < this.asks.length; i++) {
-      if(order.price >= this.asks[i]?.price! &&  executedQty < order.quantity) {
-        const filledQty = Math.min(order.quantity - executedQty, this.asks[i]?.quantity!)
+    for(let i = 0; i < this.bids.length && executedQty < order.quantity ; i++) {
+      const bids = this.bids[i]
+      if(order.price + bids.price === 10) {
+        const tradedQty = Math.min(order.quantity - executedQty, bids.quantity)
+        if (tradedQty === 0) continue
 
-        executedQty += filledQty
-        if (this.asks[i]) {
-          //@ts-ignore
-          this.asks[i].filled += filledQty
-        }
+        executedQty += tradedQty
+        bids.filled = executedQty
+
         fills.push({
-          price: this.asks[i]?.price!,
-          qty: filledQty,
+          price: bids.price,
+          qty: executedQty,
           tradeId: uuidv4(),
-          otherUserId: this.asks[i]?.userId!,
-          marketOrderId: this.asks[i]?.orderId!,
+          otherUserId: bids.otherUserId,
+          marketOrderId: bids.orderId
         })
       }
     }
-    for(let i = 0; i < this.asks.length; i++) {
-      if(this.asks[i]?.filled === this.asks[i]?.quantity) {
-        this.asks.splice(i, 1)
+    this.bids = this.bids.filter((bid) => bid.filled < bid.quantity)
+
+    return {executedQty, fills}
+  }
+
+  updateCurrentPrice (tradePrice: number) {
+    this.currentPrice = tradePrice
+  }
+
+  getMarketDepth () {
+    const bidLevels = this.aggregateByPrice(this.bids, true)
+    const askLevels = this.aggregateByPrice(this.asks, false)
+
+    return {
+      ask: askLevels,
+      bid: bidLevels,
+      currentPrice: this.currentPrice
+    }
+  }
+
+  aggregateByPrice (orders: MarketOrder[], descending: boolean = true) {
+    const priceMap = new Map()
+
+    orders.forEach((order) => {
+      if(order.quantity > 0) {
+        priceMap.set(order.price, (priceMap.get(order.price) || 0) + order.quantity)
       }
-    }
-    console.log("executedQty", executedQty, "  ", fills)
-    return {fills, executedQty}
+    })
+
+    const entries = Array.from(priceMap.entries())
+    .map(([price, quantity]) => [price.toString(), quantity.toString()]);
+    
+    return descending 
+      ? entries.sort((a, b) => parseFloat(b[0]) - parseFloat(a[0]))  
+      : entries.sort((a, b) => parseFloat(a[0]) - parseFloat(b[0]));
   }
 
-  matchAsk(order: Order) {
-    const fills: Fill[] = []
-    let executedQty = 0
+  getOpenOrders (userId: string) {
+    const userBids = this.bids.filter((bid) => bid.userId === userId)
+    const userAsks = this.bids.filter((ask) => ask.userId === userId)
 
-    for (let i = 0; i < this.bids.length; i++) {
-      if(this.bids[i]?.price! >= order.price && executedQty < order.quantity) {
-        const filledQty = Math.min(this.bids[i]?.quantity!, order.quantity - executedQty)
-
-        executedQty += filledQty
-        if (this.bids[i]) {
-          //@ts-ignore
-          this.bids[i].filled += filledQty
-        }
-
-        fills.push({
-          price: this.bids[i]?.price!,
-          qty: filledQty,
-          tradeId: uuidv4(),
-          otherUserId: this.bids[i]?.userId!,
-          marketOrderId: this.bids[i]?.orderId!
-        })
-      }
-    }
-    for (let i = 0; i < this.bids.length; i++) {
-      if(this.bids[i]?.filled === this.bids[i]?.quantity) {
-        this.bids.splice(i, 1)
-        i--
-      }
-    }
-    return {fills, executedQty}
+    return [...userAsks, ...userBids]
   }
 
-  getMarketDepth() {
-    const bids: [string, string][] = []
-    const asks: [string, string][] = []
+  cancelOrder (orderId: string, userId: string) {
+    const bidIndex = this.bids.findIndex((bid) => bid.userId === userId && bid.orderId === orderId)
 
-    const bidsObject : {[key: string]: number} = {}
-    const asksObject : {[key: string]: number} = {}
-
-    for(let i = 0; i <= this.bids.length; i++){
-      const priceKey = this.bids[i]?.price.toString()!
-      if(!bidsObject[priceKey]){
-        bidsObject[priceKey] = 0
-      }
-      
-      bidsObject[priceKey] += this.bids[i]?.quantity!
+    if(bidIndex) {
+      this.bids.splice(bidIndex, 1)
+      console.log("order cancelled")
     }
+    const askIndex = this.asks.findIndex((ask) => ask.userId === userId && ask.orderId === orderId)
 
-    for (const key in bidsObject){
-      bids.push([key, bidsObject[key]?.toString()!])
+    if(askIndex) {
+      this.bids.splice(askIndex, 1)
+      console.log("order cancelled")
     }
-
-    for (let i = 0; i < this.asks.length; i++) {
-      const priceKey = this.asks[i]?.price.toString()!
-      if(!asksObject[priceKey]){
-        asksObject[priceKey] = 0
-      }
-      asksObject[priceKey] += this.asks[i]?.quantity!
-    }
-
-    for (const key in asksObject) {
-      asks.push([key, asksObject[key]?.toString()!])
-    }
-    return {bids, asks}
+    console.log("order/user not found")
   }
 
-  getOpenOrders(userId: string):Order[] {
-    const bids = this.bids.filter((bid) => bid.userId === userId)
-    const asks = this.asks.filter((asks) => asks.userId === userId)
-
-    return [...bids, ...asks]
-  }
-
-  cancelBid(order: Order) {
-    const index = this.bids.findIndex(bid => bid.orderId === order.orderId)
-    if (index !== -1) {
-      const price = this.bids[index]?.price
-      this.bids.splice(index, 1)
-      return price
-    }
-  }
-
-  cancelAsk(order: Order) {
-    const index = this.asks.findIndex(ask => ask.orderId === order.orderId)
-    if (index !== -1) {
-      const price = this.asks[index]?.price
-      this.asks.splice(index, 1)
-      return price
-    }
-  }
-
-  getSnapshot() {
+  getSnapshot () {
     return {
       bids: this.bids,
       asks: this.asks,
       market: this.market,
       lastTradeId: this.lastTradeId,
       currentPrice: this.currentPrice
-    }
+    };
   }
 }
