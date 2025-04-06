@@ -25,11 +25,11 @@ export class User {
     })
   }
 
-  public subscribe(subscription: string) {
+  subscribe(subscription: string) {
     this.subscriptions.push(subscription)
   }
 
-  public unsubscribe(subscription: string) {
+  unsubscribe(subscription: string) {
     this.subscriptions = this.subscriptions.filter(sub => sub !== subscription)
   }
 

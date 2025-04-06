@@ -1,0 +1,77 @@
+{
+  "orderbooks": [
+    {
+      "bids": [],
+      "asks": [],
+      "market": "csk_to_win_ipl_2025",
+      "lastTradeId": 1,
+      "currentPrice": 0
+    },
+    {
+      "bids": [
+        {
+          "price": 49000,
+          "quantity": 1.2,
+          "filled": 0,
+          "orderId": "1fbfddec-7f4e-462b-a6f4-6465787f400a",
+          "side": "yes",
+          "userId": "user1"
+        },
+        {
+          "price": 48000,
+          "quantity": 0.8,
+          "filled": 0,
+          "orderId": "37749857-0482-4a93-be8e-417d930b6a2b",
+          "side": "yes",
+          "userId": "user2"
+        },
+        {
+          "price": 50000,
+          "quantity": 1.5,
+          "side": "yes",
+          "userId": "abc223",
+          "filled": 1,
+          "orderId": "f762f2cb-038c-4f35-b31d-58a83620fadd"
+        },
+        {
+          "price": 50000,
+          "quantity": 1.5,
+          "side": "yes",
+          "userId": "abc223",
+          "filled": 0,
+          "orderId": "2df1b168-9e0b-4f62-8ba1-6beeb51b83d6"
+        },
+        {
+          "price": 50000,
+          "quantity": 1.5,
+          "side": "yes",
+          "userId": "abc223",
+          "filled": 0,
+          "orderId": "60f9429a-8f74-4343-b401-a76510814d5c"
+        },
+        {
+          "price": 50000,
+          "quantity": 1.5,
+          "side": "yes",
+          "userId": "abc223",
+          "filled": 0,
+          "orderId": "70eef919-fef4-4dca-b0f1-649404e7bd6f"
+        }
+      ],
+      "asks": [
+        {
+          "price": 51000,
+          "quantity": 0.5,
+          "filled": 0,
+          "orderId": "b36f455f-12da-45ca-8d9c-55791d14bba8",
+          "side": "no",
+          "userId": "user4"
+        }
+      ],
+      "market": "BTC-INR",
+      "lastTradeId": 1,
+      "currentPrice": 50000
+    }
+  ],
+  "balances": []
+}

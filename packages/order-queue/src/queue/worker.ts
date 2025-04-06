@@ -1,7 +1,7 @@
 import { Worker } from "bullmq"
 import { Engine } from "@repo/engine"
 
-const engine = new Engine()
+const engine = Engine.getInstance()
 
 const worker = new Worker("ORDER_QUEUE",
   async(job) => {

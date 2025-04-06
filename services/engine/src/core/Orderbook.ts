@@ -182,6 +182,7 @@ export class Orderbook {
     return {
       bids: this.bids,
       asks: this.asks,
+      market: this.market,
       lastTradeId: this.lastTradeId,
       currentPrice: this.currentPrice
     }
