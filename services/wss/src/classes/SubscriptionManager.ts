@@ -29,7 +29,7 @@ export class SubscriptionManager {
     this.reverseSubscription.set(subscription, newRevSub)
 
     if(this.reverseSubscription.get(subscription)?.length === 1) {
-      this.redisClient.subscribe(subscription, this.redisCallbackHandler)
+      this.redisClient.subscribe(subscription, this.redisCallbackHandler.bind(this)) //check
     }
   }
 
@@ -51,7 +51,9 @@ export class SubscriptionManager {
   private redisCallbackHandler (message: string, channel: string) {
     const parsedMessage = JSON.parse(message)
     this.reverseSubscription.get(channel)?.forEach((sub) => {
-      UserManager.getInstance().getUser(sub)?.emitMessage(parsedMessage)
+      // UserManager.getInstance().getUser(sub)?.emitMessage(parsedMessage) --check
+      const user = UserManager.getInstance().getUser(sub)
+      user?.emitMessage(JSON.stringify(parsedMessage))
     })
   }
 

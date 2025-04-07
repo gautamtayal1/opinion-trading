@@ -23,10 +23,10 @@ export class Engine {
     try {
       snapshot = fs.readFileSync(ENGINE_SNAPSHOT_PATH)
     } catch (error) {
-      console.log("no snapshot found")
+
     }
     if (snapshot) {
-      console.log("snapshot available")
+
       const parsedSnapshot = JSON.parse(snapshot.toString())
       this.orderbooks = parsedSnapshot.orderbooks.map((book: any) => {
         return new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
@@ -36,7 +36,7 @@ export class Engine {
         for (const [userId, balance] of parsedSnapshot.balances) {
           this.balances.set(userId, balance);
         }
-        console.log("Balances restored from snapshot:", this.balances.size);
+
       }
     } else {
       this.orderbooks = [new Orderbook
@@ -45,16 +45,14 @@ export class Engine {
     setInterval(() => {
       this.saveSnapshot()
       console.log("snapshot taken")
-    }, 1000 * 8)
+    }, 1000 * 30)
   }
-
   public static getInstance() {
     if(!this.instance) {
       this.instance = new Engine()
     }
     return this.instance
   }
-
   saveSnapshot() {
     const snapshotSnapshot = {
       orderbooks: this.orderbooks.map((book) => book.getSnapshot()
@@ -63,7 +61,6 @@ export class Engine {
     }
     fs.writeFileSync(ENGINE_SNAPSHOT_PATH, JSON.stringify(snapshotSnapshot))
   }
-
   processOrder(order: any) {
     console.log("hello from engine")
     this.setBaseBalance(order.userId)
@@ -71,7 +68,7 @@ export class Engine {
     switch(order.type){
       case "CREATE_ORDER":
         try {
-          console.log("inside create order")
+
           const { fills, executedQty , orderId } = this.createOrder(
             order.market,
             order.price,
@@ -79,6 +76,17 @@ export class Engine {
             order.side,
             order.userId
           )
+          console.log("createOrder: order placed")
+
+          RedisManager.getInstance().publishToUser(order.userId, {
+            type: "ORDER_PLACED",
+            payload: {
+              executedQty,
+              fills,
+              orderId
+            }
+          })
+          console.log("publishToUser: order placed")
           console.log("createOrder: order placed")
 
           RedisManager.getInstance().publishToUser(order.userId, {
@@ -282,7 +290,6 @@ export class Engine {
       })
     }
   }
-
   onRamp(userId: string, amount:number) {
     const existingBalance = this.balances.get(userId)
     this.balances.set(userId, {

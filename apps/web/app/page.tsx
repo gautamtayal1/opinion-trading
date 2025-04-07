@@ -11,7 +11,7 @@ export default function Home() {
   useEffect(() => {
     if (isConnected) {
       // Subscribe to BTC-USD orderbook channel
-      subscribe("orderbook:BTC-USD", (data) => {
+      subscribe("BTC-USD", (data) => {
         try {
           const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
           setOrderUpdates(prev => [...prev, parsedData]);
@@ -22,7 +22,7 @@ export default function Home() {
       
       // Clean up subscription when component unmounts
       return () => {
-        unsubscribe("orderbook:BTC-USD");
+        unsubscribe("BTC-USD");
       };
     }
   }, [isConnected, subscribe, unsubscribe]);

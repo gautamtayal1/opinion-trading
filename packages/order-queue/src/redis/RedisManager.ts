@@ -34,15 +34,17 @@ export class RedisManager {
     return this.instance
   }
 
-  public pushMessage( message: any) {
-    this.client.lPush("process_orders", JSON.stringify(message))
-  }
-
   public publishToChannel (channel:any, message: any) {
     this.client.publish(channel, JSON.stringify(message))
   }
 
-  public publishToUser (channel: any, message: any) {
-    this.client.publish(channel, JSON.stringify(message))
+  public async publishToUser(channel: any, message: any) {
+    // Wait until Redis is ready
+      console.log("publish")
+      await new Promise((res) => setTimeout(res, 5000));
+      console.log("hello2")
+  
+    // Now publish
+    await this.client.publish(channel, JSON.stringify(message));
   }
 }

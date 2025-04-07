@@ -21,7 +21,6 @@ export class UserManager {
     this.users.set(id, user)
     this.registerOnClose(ws, id)
     return user
-    
   }
 
   private registerOnClose(ws, id) {
