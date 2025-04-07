@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.3",
     "lucide-react": "^0.487.0",
     "next": "^15.2.1",
+    "postcss": "^8.5.3",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.3"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

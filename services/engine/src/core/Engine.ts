@@ -78,7 +78,7 @@ export class Engine {
           )
           console.log("createOrder: order placed")
 
-          RedisManager.getInstance().publishToUser("BTC-USD", {
+          RedisManager.getInstance().publishToUser(order.userId, {
             type: "ORDER_PLACED",
             payload: {
               executedQty,

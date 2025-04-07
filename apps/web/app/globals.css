@@ -1,50 +1,81 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tailwindcss";
 
-@media (prefers-color-scheme: dark) {
+
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --primary: 263 90% 51%;
+    --primary-hover: 263 90% 60%;
+    --secondary: 180 100% 50%;
+    --secondary-hover: 180 100% 60%;
+    --muted: 240 5% 64.9%;
+    --accent: 12 90% 55%;
+    --accent-hover: 12 90% 65%;
   }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+.glow {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
+.glow-text {
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+.gradient-border {
+  background: linear-gradient(var(--background), var(--background)) padding-box,
+              linear-gradient(to right, hsl(var(--primary)), hsl(var(--secondary))) border-box;
+  border: 2px solid transparent;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.hero-gradient {
+  background: radial-gradient(circle at top right, 
+    rgba(139, 92, 246, 0.15),
+    rgba(0, 0, 0, 0) 50%),
+    radial-gradient(circle at bottom left,
+    rgba(14, 165, 233, 0.15),
+    rgba(0, 0, 0, 0) 50%);
 }
 
-.imgDark {
-  display: none;
+.card-shine {
+  position: relative;
+  overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+.card-shine::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  transform: rotate(0deg);
+  animation: rotate 10s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
   }
-
-  .imgLight {
-    display: none;
+  to {
+    transform: rotate(360deg);
   }
-  .imgDark {
-    display: unset;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
