@@ -7,6 +7,7 @@ export class SubscriberManager {
   constructor() {
     this.client = createClient()
     this.client.connect()
+    console.log("connected to redis")
   }
 
   public static getInstance() {
