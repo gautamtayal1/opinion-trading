@@ -19,7 +19,7 @@ export class SubscriptionManager {
     return this.instance
   }
 
-  subscribe(userId:string, subscription: string) {
+  subscribe(userId: string, subscription: string) {
     if(this.subscriptions.get(userId)?.includes(subscription)) return
     const newSub = (this.subscriptions.get(userId) || []).concat(subscription)
 

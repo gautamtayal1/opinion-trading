@@ -1,6 +1,5 @@
 import { WebSocket } from "ws";
 import { SubscriptionManager } from "./SubscriptionManager";
-import { SubscriberManager } from "@repo/order-queue";
 
 export class User {
   private id: string;

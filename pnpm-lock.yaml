@@ -47,6 +47,9 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      lucide-react:
+        specifier: ^0.487.0
+        version: 0.487.0(react@19.1.0)
       next:
         specifier: ^15.2.1
         version: 15.2.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1824,6 +1827,11 @@ packages:
   lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
+
+  lucide-react@0.487.0:
+    resolution: {integrity: sha512-aKqhOQ+YmFnwq8dWgGjOuLc8V1R9/c/yOd+zDY4+ohsR2Jo05lSGc3WsstYPIzcTpeosN7LoCkLReUUITvaIvw==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   luxon@3.6.1:
     resolution: {integrity: sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ==}
@@ -4493,6 +4501,10 @@ snapshots:
   lower-case@1.1.4: {}
 
   lru-cache@7.18.3: {}
+
+  lucide-react@0.487.0(react@19.1.0):
+    dependencies:
+      react: 19.1.0
 
   luxon@3.6.1: {}
 

@@ -45,8 +45,9 @@ export class Orderbook {
     this.asks.sort((a, b) => a.price - b.price)
   }
 
-  createOrder (order: MarketOrder) {
+  addOrder (order: MarketOrder) {
     if (order.side === "yes") {
+      console.log("matching bid")
       const {executedQty, fills} = this.matchBid(order)
       order.filled = executedQty
 
@@ -59,6 +60,7 @@ export class Orderbook {
         const lastFill = fills[fills.length - 1]
         if (lastFill) {
           this.updateCurrentPrice(lastFill.price)
+          console.log("current price updated to: ", this.currentPrice)
         }
       }
       return { executedQty, fills }
@@ -169,7 +171,7 @@ export class Orderbook {
 
   getOpenOrders (userId: string) {
     const userBids = this.bids.filter((bid) => bid.userId === userId)
-    const userAsks = this.bids.filter((ask) => ask.userId === userId)
+    const userAsks = this.asks.filter((ask) => ask.userId === userId)
 
     return [...userAsks, ...userBids]
   }
@@ -177,14 +179,14 @@ export class Orderbook {
   cancelOrder (orderId: string, userId: string) {
     const bidIndex = this.bids.findIndex((bid) => bid.userId === userId && bid.orderId === orderId)
 
-    if(bidIndex) {
+    if(bidIndex !== -1) {
       this.bids.splice(bidIndex, 1)
       console.log("order cancelled")
     }
     const askIndex = this.asks.findIndex((ask) => ask.userId === userId && ask.orderId === orderId)
 
-    if(askIndex) {
-      this.bids.splice(askIndex, 1)
+    if(askIndex !== -1) {
+      this.asks.splice(askIndex, 1)
       console.log("order cancelled")
     }
     console.log("order/user not found")
