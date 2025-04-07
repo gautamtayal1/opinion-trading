@@ -21,10 +21,12 @@ export class UserManager {
     this.users.set(id, user)
     this.registerOnClose(ws, id)
     return user
+    
   }
 
   private registerOnClose(ws, id) {
-    ws.on("close", () => {
+    ws.on("close", (code, reason) => {
+      console.log(`User ${id} disconnected (code: ${code}, reason: ${reason})`)
       this.users.delete(id)
       SubscriptionManager.getInstance().userLeft(id)
     })

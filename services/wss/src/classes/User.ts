@@ -12,8 +12,8 @@ export class User {
     this.addListeners()
   }
 
-  private addListeners() {
-    this.ws.on("message", (message: string) => {
+  private handleMessage(message: string) {
+    try {
       const parsedMessage = JSON.parse(message)
       if(parsedMessage.method === "subscribe_orderbook") {
         parsedMessage.events.forEach((evn: string) => {SubscriptionManager.getInstance().subscribe(this.id, evn)})
@@ -21,18 +21,33 @@ export class User {
       if(parsedMessage.method === "unsubscribe_orderbook") {
         parsedMessage.events.forEach((evn: string) => SubscriptionManager.getInstance().unsubscribe(this.id, evn))
       }
-    })
+    } catch (error) {
+      this.ws.send(`Received: ${message}`)
+    }
   }
+  private addListeners() {
+    this.ws.on("message", (data: Buffer) => {
+      this.handleMessage(data.toString())
+    })
 
+    this.ws.on("error", (error) => {
+      console.error("WebSocket error:", error)
+    }) 
+  }
   subscribe(subscription: string) {
     this.subscriptions.push(subscription)
   }
-
   unsubscribe(subscription: string) {
     this.subscriptions = this.subscriptions.filter(sub => sub !== subscription)
   }
-
   emitMessage(message: string) {
-    this.ws.send(JSON.stringify(message))
+    try {
+      this.ws.send(message)
+    } catch (error) {
+      console.error("Error sending message:", error)
+    }
+  }
+  getId(): string {
+    return this.id
   }
 }

@@ -8,5 +8,15 @@ wss.on('listening', () => {
 })
 
 wss.on("connection", (ws) => {
-  UserManager.getInstance().addUser(ws)
+  try {
+    const user = UserManager.getInstance().addUser(ws)
+    console.log(`New user connected: ${user.getId()}`)
+  } catch (error) {
+    console.error("Error handling new connection:", error)
+    ws.close()
+  }
+})
+
+wss.on("error", (error) => {
+  console.error("WebSocket server error:", error)
 })
