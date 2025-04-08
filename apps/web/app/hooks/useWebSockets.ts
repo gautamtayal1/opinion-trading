@@ -26,22 +26,16 @@ export function useWebSocket(url: string) {
             handler(data.data)
           }
         }
-
         setMessages((prev) => [...prev, data])
       } catch (error) {
         setMessages((prev) => [...prev, event.data])
+        console.log(error)
       }
     }
-
     ws.current.onclose = () => {
       console.log("websocket disconnected")
       setIsConnected(false)
     }
-
-    ws.current.onerror = (err) => {
-      console.error("websocket error: ", err)
-    }
-
     return () => {
       ws.current?.close()
     }

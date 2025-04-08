@@ -45,7 +45,7 @@ export class Engine {
     setInterval(() => {
       this.saveSnapshot()
       console.log("snapshot taken")
-    }, 1000 * 30)
+    }, 1000 * 120)
   }
   public static getInstance() {
     if(!this.instance) {
