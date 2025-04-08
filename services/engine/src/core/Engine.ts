@@ -55,7 +55,6 @@ static async create() {
       ),
       balances: Array.from(this.balances.entries())
     }
-    // fs.writeFileSync(ENGINE_SNAPSHOT_PATH, JSON.stringify(snapshotSnapshot))
     await S3Manager.uploadSnapshot(snapshot, ENGINE_KEY)
   }
   processOrder(order: any) {
@@ -240,17 +239,25 @@ static async create() {
     userId: string, 
     fills: any
   ) {
+    console.log("yo cant see me")
+    let totalCost = 0
     fills.forEach((fill: any) => {
-      const balance = this.balances.get(userId)
-      const totalCost = fill.price * fill.qty
-      console.log("total cost: " + totalCost)
-      this.balances.set(userId, {
-        available: balance?.available || 0,
-        locked: balance?.locked || 0 - totalCost
+      console.log(fill.price, fill.qty, userId, fills)
+      totalCost += (10 - fill.price) * fill.qty
+      
+      const otherUserBal = this.balances.get(fill.otherUserId)
+      this.balances.set(fill.otherUserId, {
+        available: otherUserBal?.available || 0,
+        locked: (otherUserBal?.locked || 0) - (fill.price * fill.qty)
       })
     })
-    console.log("updateBalance: balance updated")
     
+    const currentBalance = this.balances.get(userId) || { available: 0, locked: 0 }
+    this.balances.set(userId, {
+      available: currentBalance.available,
+      locked: currentBalance.locked - totalCost
+    })
+    console.log("updateBalance: balance updated")
   }
   createRedisTrade(
     market: string, 

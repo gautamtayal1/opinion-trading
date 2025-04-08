@@ -101,7 +101,7 @@ export class Orderbook {
           fills.push({
             price: ask.price,
             qty: executedQty,
-            otherUserId: ask.otherUserId,
+            otherUserId: ask.userId,
             tradeId: uuidv4(),
             marketOrderId: ask.orderId
           })
@@ -130,7 +130,7 @@ export class Orderbook {
             price: bids.price,
             qty: executedQty,
             tradeId: uuidv4(),
-            otherUserId: bids.otherUserId,
+            otherUserId: bids.userId,
             marketOrderId: bids.orderId
           })
         }
