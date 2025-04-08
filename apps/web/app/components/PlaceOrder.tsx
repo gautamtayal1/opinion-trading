@@ -63,17 +63,49 @@ const PlaceOrder = () => {
           {/* Price Input */}
           <div className="mb-6">
             <label className="mb-2 block text-sm text-[hsl(var(--muted))]">
-              Price (0-1)
+              Price (0.1-10)
             </label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              step="0.01"
-              min="0"
-              max="1"
-              className="w-full rounded-lg border border-purple-500/20 bg-black/20 p-3 text-white outline-none focus:border-purple-500/50"
-            />
+            <div 
+              className="flex w-full items-center rounded-lg border border-purple-500/20 bg-black/20 text-white outline-none focus-within:border-purple-500/50"
+            >
+              <button
+                className="px-3 py-3 hover:text-purple-400 text-xl"
+                onClick={() => {
+                  const newPrice = Math.max(0.1, Number(price) - 0.1);
+                  setPrice(newPrice.toFixed(1));
+                }}
+              >
+                -
+              </button>
+              <input
+                value={price}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val >= 0.1 && val <= 10) {
+                    setPrice(e.target.value);
+                  }
+                }}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                  const newPrice = Math.min(10, Math.max(0.1, Number(price) + delta));
+                  setPrice(newPrice.toFixed(1));
+                }}
+                step="0.1"
+                min="0.1"
+                max="10"
+                className="w-full bg-transparent text-center outline-none"
+              />
+              <button
+                className="px-3 py-3 hover:text-purple-400 text-xl"
+                onClick={() => {
+                  const newPrice = Math.min(10, Number(price) + 0.1);
+                  setPrice(newPrice.toFixed(1));
+                }}
+              >
+                +
+              </button>
+            </div>
           </div>
 
           {/* Quantity Input */}
@@ -81,13 +113,45 @@ const PlaceOrder = () => {
             <label className="mb-2 block text-sm text-[hsl(var(--muted))]">
               Quantity
             </label>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              min="1"
-              className="w-full rounded-lg border border-purple-500/20 bg-black/20 p-3 text-white outline-none focus:border-purple-500/50"
-            />
+            <div
+              className="flex w-full items-center rounded-lg border border-purple-500/20 bg-black/20 text-white outline-none focus-within:border-purple-500/50"
+            >
+              <button
+                className="px-3 py-3 hover:text-purple-400 text-xl"
+                onClick={() => {
+                  const newQuantity = Math.max(1, Number(quantity) - 1);
+                  setQuantity(newQuantity.toString());
+                }}
+              >
+                -
+              </button>
+              <input
+                value={quantity} 
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val >= 1) {
+                    setQuantity(e.target.value);
+                  }
+                }}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY > 0 ? -1 : 1;
+                  const newQuantity = Math.max(1, Number(quantity) + delta);
+                  setQuantity(newQuantity.toString());
+                }}
+                min="1"
+                className="w-full bg-transparent text-center outline-none"
+              />
+              <button
+                className="px-3 py-3 hover:text-purple-400 text-xl"
+                onClick={() => {
+                  const newQuantity = Number(quantity) + 1;
+                  setQuantity(newQuantity.toString());
+                }}
+              >
+                +
+              </button>
+            </div>
           </div>
 
           {/* Total */}

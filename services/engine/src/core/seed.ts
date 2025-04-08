@@ -5,16 +5,16 @@ import { Engine } from "./Engine";
 const seedOrderbook = () => {
   const bids: Order[] = [
     {
-      price: 49000,
-      quantity: 1.2,
+      price: 5,
+      quantity: 2,
       filled: 0,
       orderId: uuidv4(),
       side: "yes",
       userId: "user1"
     },
     {
-      price: 48000,
-      quantity: 0.8,
+      price: 5,
+      quantity: 1,
       filled: 0,
       orderId: uuidv4(),
       side: "yes",
@@ -24,16 +24,16 @@ const seedOrderbook = () => {
 
   const asks: Order[] = [
     {
-      price: 50000,
-      quantity: 1.0,
+      price: 5,
+      quantity: 2,
       filled: 0,
       orderId: uuidv4(),
       side: "no",
       userId: "user3"
     },
     {
-      price: 51000,
-      quantity: 0.5,
+      price: 7,
+      quantity: 5,
       filled: 0,
       orderId: uuidv4(),
       side: "no",

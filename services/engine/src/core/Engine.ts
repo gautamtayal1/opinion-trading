@@ -26,17 +26,14 @@ export class Engine {
 
     }
     if (snapshot) {
-
       const parsedSnapshot = JSON.parse(snapshot.toString())
       this.orderbooks = parsedSnapshot.orderbooks.map((book: any) => {
         return new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
       })
-
       if (parsedSnapshot.balances && Array.isArray(parsedSnapshot.balances)) {
         for (const [userId, balance] of parsedSnapshot.balances) {
           this.balances.set(userId, balance);
         }
-
       }
     } else {
       this.orderbooks = [new Orderbook
@@ -105,7 +102,7 @@ export class Engine {
               orderId: ""
             }
           })
-          console.log("publishToUser: order cancelled")
+          console.log("publishToUser: order cancelled", error)
         }
       break;
 

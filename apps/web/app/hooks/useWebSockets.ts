@@ -19,7 +19,7 @@ export function useWebSocket(url: string) {
     ws.current.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
-        
+        console.log(data)
         if (data.event === "message" && data.channel) {
           const handler = messageHandlers.current.get(data.channel)
           if(handler) {
@@ -27,13 +27,14 @@ export function useWebSocket(url: string) {
           }
         }
         setMessages((prev) => [...prev, data])
+        
       } catch (error) {
         setMessages((prev) => [...prev, event.data])
         console.log(error)
       }
     }
     ws.current.onclose = () => {
-      console.log("websocket disconnected")
+      console.log("Websocket Disconnected")
       setIsConnected(false)
     }
     return () => {
@@ -47,11 +48,9 @@ export function useWebSocket(url: string) {
         method: "subscribe_orderbook",
         events: [channel]
       }))
-
       if (callback) {
         messageHandlers.current.set(channel, callback)
       }
-
       return true
     }
     return false
@@ -63,37 +62,16 @@ export function useWebSocket(url: string) {
         method: "unsubscribe_orderbook",
         events: [channel]
       }))
-
       messageHandlers.current.delete(channel)
-
       return true
     }
     return false
   }, [])
-
-  const publish = useCallback((channel: string, data: any) => {
-    if (ws.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify({
-        method: "publish",
-        channel,
-        data
-      }))
-      return true
-    }
-    return false
-  }, [])
-
-  // const sendMessage = (message: string) => {
-  //   if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-  //     ws.current.send(message)
-  //   }
-  // }
 
   return {
     isConnected, 
     messages, 
     subscribe,
     unsubscribe,
-    publish
   }
 }
