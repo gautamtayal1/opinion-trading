@@ -29,9 +29,6 @@ export default function Home() {
                 Start Predicting
               </button>
               </Link>
-              <button className="rounded-xl border border-purple-500/20 bg-purple-500/10 px-8 py-4 text-lg font-semibold transition-all hover:bg-purple-500/20">
-                Learn More
-              </button>
             </div>
 
             {/* Market Preview */}

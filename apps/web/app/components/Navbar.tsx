@@ -26,9 +26,16 @@ export default function Navbar() {
             >
               Events
             </Link>
+            <Link 
+              href="/portfolio" 
+              className="rounded-lg px-4 py-2 text-[hsl(var(--muted))] transition-colors hover:text-white"
+            >
+              Portfolio
+            </Link>
             <button className="glow rounded-lg bg-[hsl(var(--primary))] px-4 py-2 font-medium text-white transition-all hover:bg-[hsl(var(--primary-hover))] hover:scale-105">
               Sign Up
             </button>
+            
           </div>
         </div>
       </div>
