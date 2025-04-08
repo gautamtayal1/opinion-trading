@@ -239,7 +239,7 @@ static async create() {
     userId: string, 
     fills: any
   ) {
-    console.log("yo cant see me")
+
     let totalCost = 0
     fills.forEach((fill: any) => {
       console.log(fill.price, fill.qty, userId, fills)
@@ -295,7 +295,7 @@ static async create() {
         side: order.side
       }
     })
-    console.log("updateRedisOrder: order updated")
+
     fills.forEach((fill: any) => {
       orderProcessor.add("fill_added", {
         type: "ORDER_UPDATE",

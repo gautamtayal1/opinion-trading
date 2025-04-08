@@ -14,6 +14,7 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
   Payout      Payout[]
+  orders      Order[]
 }
 
 model Portfolio {
@@ -37,7 +38,34 @@ model Event {
   max_bet     Float
   quantity    Int
   sot         String
+  status      EventStatus @default(ONGOING)
   traders     Int      @default(0)
+  trades      Trade[]
+}
+
+model Order {
+  id        String   @id
+  market    String
+  price     Float
+  quantity  Int
+  executedQty Int
+  createdAt DateTime @default(now())
+  user      User     @relation(references: [id], fields: [userId])
+  userId    String
+  status    OrderStatus @default(PENDING)
+  trades    Trade[]
+}
+
+model Trade {
+  id          String @id @default(cuid())
+  orderId     String
+  order       Order  @relation(references: [id], fields: [orderId])
+  executedQty Int
+  quantity    Int
+  price       Float
+  eventSlug   String
+  event       Event  @relation(references: [slug], fields: [eventSlug])
+  side        TradeSide
 }
 
 model Payout {
@@ -60,11 +88,6 @@ model OTP {
   isVerified Boolean  @default(false)
 }
 
-enum UserRole {
-  ADMIN
-  USER
-}
-
 enum EventStatus {
   ONGOING
   ENDED
@@ -79,11 +102,6 @@ enum PayoutStatus {
   PENDING
   COMPLETED
   FAILED
-}
-
-enum TradeStatus {
-  ACTIVE
-  PAST
 }
 
 enum OrderStatus {

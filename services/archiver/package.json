@@ -1,11 +1,8 @@
 {
-  "name": "@repo/db",
+  "name": "archiver",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "exports": {
-    "./client": "./src/index.ts"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,9 +11,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "^6.6.0",
     "@repo/typescript-config": "workspace:*",
-    "dotenv": "^16.4.7",
-    "prisma": "^6.5.0"
+    "bullmq": "^5.47.1",
+    "@repo/order-queue": "workspace:*",
+    "@repo/db": "workspace:*"
   }
 }
