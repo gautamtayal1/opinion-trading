@@ -7,13 +7,15 @@ import { useParams } from "next/navigation";
 export default function Home() {
   const { isConnected, messages, subscribe, unsubscribe } = useWebSocket('ws://localhost:8081');
   const [orderUpdates, setOrderUpdates] = useState<any[]>([]);
-  const {id} = useParams()
-  console.log(id)
+  const [marketDepth, setMarketDepth] = useState<any[]>([]);
+  const param = useParams()
+  const market = param.id as string
+
   // Subscribe to orderbook updates when connected
   useEffect(() => {
     if (isConnected) {
       // Subscribe to BTC-USD orderbook channel
-      subscribe("BTC-USD", (data) => {
+      subscribe(market, (data) => {
         try {
           const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
           setOrderUpdates(prev => [...prev, parsedData]);
@@ -21,10 +23,19 @@ export default function Home() {
           console.error("Error parsing order data:", err);
         }
       });
+      subscribe(`depth@${market}`, (data) => {
+        try {
+          const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+          setMarketDepth(prev => [...prev, parsedData]);
+        } catch (err) {
+          console.error("Error parsing order data:", err);
+        }
+      });
       
       // Clean up subscription when component unmounts
       return () => {
-        unsubscribe("BTC-USD");
+        unsubscribe(market);
+        unsubscribe(`depth@${market}`)
       };
     }
   }, [isConnected, subscribe, unsubscribe]);

@@ -6,7 +6,7 @@ import { Calendar, TrendingUp, Gamepad2, Trophy, Users, Zap } from 'lucide-react
 
 const events = [
   {
-    id: 1,
+    id: "BTC-INR",
     title: "World Cup Finals 2026",
     category: "Sports",
     description: "Predict the winner of the FIFA World Cup 2026 finals",

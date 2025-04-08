@@ -87,7 +87,6 @@ export class Engine {
             }
           })
           
-
           RedisManager.getInstance().publishToUser(order.userId, {
             type: "ORDER_PLACED",
             payload: {
@@ -111,15 +110,76 @@ export class Engine {
       break;
 
       case "CANCEL_ORDER":
+        try {
+          const orderbook = this.orderbooks.find((book) => book.market === order.market)
+          const orderId = order.orderId
+          const market = order.market
+          if(!orderbook) {
+            throw new Error("orderbook not found")
+          }
+          
+          const cancelOrder = orderbook.bids.find((bid) => bid.orderId === orderId) || orderbook.asks.find((ask) => ask.orderId === orderId)
+          
+          if (!cancelOrder) {
+            console.log("order not found")
+          }
+
+          orderbook.cancelOrder(order.orderId, order.userId)
+          const remainingQuantity = order.quantity - order.filled  //TODO - filled not assigned on order, given after the order is created - recheck the logic
+
+          const balance = this.balances.get(order.userId)
+          if (balance) {
+            balance.available += remainingQuantity * order.price
+            balance.locked -= remainingQuantity * order.price
+            this.publishDepthForCancel(order.price.toString(), market)
+          }
+
+          RedisManager.getInstance().publishToUser(order.userId, {
+            type: "ORDER_CANCELLED",
+            payload: {
+              orderId,
+              executedQty: 0,
+              remainingQty: 0
+            }
+          })
+        } catch (error) {
+          console.log(error + "error cancelling order")
+        }
       break;
 
       case "GET_OPEN_ORDERS":
+        try {
+          const orderbook = this.orderbooks.find((book) => book.market === order.market)
+          if(!orderbook) return
+
+          const userOrders = orderbook.getOpenOrders(order.userId)
+          RedisManager.getInstance().publishToUser(order.userId, {
+            type: "OPEN_ORDERS",
+            payload: userOrders
+          })
+        } catch (error) {
+          console.log(error)
+        }
       break;
 
       case "ON_RAMP":
+        const userId = order.userId
+        const amount = Number(order.amount)
+        this.onRamp(userId, amount)
       break;
 
       case "GET_DEPTH":
+        try {
+          const orderbook = this.orderbooks.find((book) => book.market === order.market)
+          if(!orderbook) return 
+
+          RedisManager.getInstance().publishToUser(order.userId, {
+            type: "DEPTH",
+            payload: orderbook.getMarketDepth()
+          })
+        } catch (error) {
+          console.log(error)
+        }
       break;
 
       default:
@@ -294,6 +354,24 @@ export class Engine {
     this.balances.set(userId, {
       available: existingBalance?.available || 0 + amount,
       locked: existingBalance?.locked || 0
+    })
+  }
+  publishDepthForCancel(price: string, market: string) {
+    const orderbook = this.orderbooks.find((book) => book.market === market)
+    if (!orderbook) return
+
+    const {bid, ask, currentPrice} = orderbook.getMarketDepth()
+    const updatedBids = bid.filter((b) => b[0] === price)
+    const updatedAsks = ask.filter((a) => a[0] === price)
+
+    RedisManager.getInstance().publishToChannel(`depth@${market}`, {
+      stream: `depth@${market}`,
+      data: {
+        a: updatedAsks.length ? updatedAsks : [[price, "0"]],
+        b: updatedBids.length ? updatedBids : [[price, "0"]],
+        e: "depth",
+        cp: currentPrice
+      }
     })
   }
 }
