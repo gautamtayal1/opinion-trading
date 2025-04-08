@@ -1,9 +1,14 @@
-import { Orderbook, Order } from "./Orderbook";
+import { Orderbook } from "./Orderbook";
 import { v4 as uuidv4 } from "uuid";
 import { Engine } from "./Engine";
+import dotenv from "dotenv";
+dotenv.config();
 
-const seedOrderbook = () => {
-  const bids: Order[] = [
+
+const seedOrderbook = async() => {
+  console.log("S3 BUCKET =", process.env.S3_BUCKET_NAME);
+
+  const bids: any[] = [
     {
       price: 5,
       quantity: 2,
@@ -22,7 +27,7 @@ const seedOrderbook = () => {
     }
   ];
 
-  const asks: Order[] = [
+  const asks: any[] = [
     {
       price: 5,
       quantity: 2,
@@ -41,7 +46,8 @@ const seedOrderbook = () => {
     }
   ];
   const orderbook = new Orderbook(bids, asks, "BTC-INR", 1, 50000);
-  const engine = Engine.getInstance()
+  const engine = await Engine.create()
+  Engine.instance = engine
   engine.addOrderbook(orderbook)
 
 

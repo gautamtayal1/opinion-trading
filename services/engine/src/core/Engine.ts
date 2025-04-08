@@ -4,6 +4,7 @@ import {v4 as uuidv4} from "uuid"
 import { RedisManager } from "@repo/order-queue";
 import path from "path";
 import { orderProcessor } from "@repo/order-queue";
+import { S3Manager } from "./S3Manager";
 
 interface UserBalance {
   available: number;
@@ -11,7 +12,8 @@ interface UserBalance {
 }
 
 export const EXAMPLE_MARKET = "csk_to_win_ipl_2025"
-const ENGINE_SNAPSHOT_PATH = path.resolve(__dirname, "../../../../shared-state/snapshot.json")
+// const ENGINE_SNAPSHOT_PATH = path.resolve(__dirname, "../../../../shared-state/snapshot.json")
+const ENGINE_KEY = "engine/snapshot.json"
 
 export class Engine {
   private balances: Map<String, UserBalance> = new Map()
@@ -19,44 +21,69 @@ export class Engine {
   public static instance: Engine | null = null
 
   constructor() {
-    let snapshot = null
-    try {
-      snapshot = fs.readFileSync(ENGINE_SNAPSHOT_PATH)
-    } catch (error) {
+    // let snapshot = null
+    // try {
+    //   snapshot = fs.readFileSync(ENGINE_SNAPSHOT_PATH)
+    // } catch (error) {
 
-    }
-    if (snapshot) {
-      const parsedSnapshot = JSON.parse(snapshot.toString())
-      this.orderbooks = parsedSnapshot.orderbooks.map((book: any) => {
-        return new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
-      })
-      if (parsedSnapshot.balances && Array.isArray(parsedSnapshot.balances)) {
-        for (const [userId, balance] of parsedSnapshot.balances) {
-          this.balances.set(userId, balance);
-        }
-      }
-    } else {
-      this.orderbooks = [new Orderbook
-        ([], [], EXAMPLE_MARKET, 1, 0)]
-    }
-    setInterval(() => {
-      this.saveSnapshot()
-      console.log("snapshot taken")
-    }, 1000 * 120)
+    // }
+    // if (snapshot) {
+    //   const parsedSnapshot = JSON.parse(snapshot.toString())
+    //   this.orderbooks = parsedSnapshot.orderbooks.map((book: any) => {
+    //     return new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
+    //   })
+    //   if (parsedSnapshot.balances && Array.isArray(parsedSnapshot.balances)) {
+    //     for (const [userId, balance] of parsedSnapshot.balances) {
+    //       this.balances.set(userId, balance);
+    //     }
+    //   }
+    // } else {
+    //   this.orderbooks = [new Orderbook
+    //     ([], [], EXAMPLE_MARKET, 1, 0)]
+    // }
+    // setInterval(() => {
+    //   this.saveSnapshot()
+    //   console.log("snapshot taken")
+    // }, 1000 * 120)
   }
+
+
+static async create() {
+  const engine = new Engine();
+  const snapshot = await S3Manager.downloadSnapshot(ENGINE_KEY);
+
+  if (snapshot) {
+    engine.orderbooks = snapshot.orderbooks.map((book: any) =>
+      new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
+    );
+
+    if (snapshot.balances && Array.isArray(snapshot.balances)) {
+      for (const [userId, balance] of snapshot.balances) {
+        engine.balances.set(userId, balance);
+      }
+    }
+  } else {
+    engine.orderbooks = [new Orderbook([], [], EXAMPLE_MARKET, 1, 0)];
+  }
+
+  setInterval(() => engine.saveSnapshot(), 1000 * 3);
+  return engine;
+}
+
   public static getInstance() {
     if(!this.instance) {
-      this.instance = new Engine()
+      throw new Error("Engine not initialized. Use Engine.create()");
     }
     return this.instance
   }
-  saveSnapshot() {
-    const snapshotSnapshot = {
+  private async saveSnapshot() {
+    const snapshot = {
       orderbooks: this.orderbooks.map((book) => book.getSnapshot()
       ),
       balances: Array.from(this.balances.entries())
     }
-    fs.writeFileSync(ENGINE_SNAPSHOT_PATH, JSON.stringify(snapshotSnapshot))
+    // fs.writeFileSync(ENGINE_SNAPSHOT_PATH, JSON.stringify(snapshotSnapshot))
+    await S3Manager.uploadSnapshot(snapshot, ENGINE_KEY)
   }
   processOrder(order: any) {
     console.log("hello from engine")
