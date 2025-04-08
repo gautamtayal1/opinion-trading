@@ -18,6 +18,7 @@
     "@repo/engine": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "bullmq": "^5.47.1",
+    "dotenv": "^16.4.7",
     "redis": "^4.7.0"
   }
 }

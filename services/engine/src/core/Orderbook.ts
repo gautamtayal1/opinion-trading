@@ -90,21 +90,23 @@ export class Orderbook {
     
     for (let i = 0; i < this.asks.length && order.quantity > executedQty; i++) {
       const ask = this.asks[i]
-      if (order.price + ask?.price === 10) {
-        const tradedQty = Math.min(order.quantity - executedQty, ask.quantity)
-        if (tradedQty === 0) continue
-
-        executedQty += tradedQty
-        ask.filled = tradedQty
-
-        fills.push({
-          price: ask.price,
-          qty: executedQty,
-          otherUserId: ask.userId,
-          tradeId: uuidv4(),
-          marketOrderId: ask.orderId
-        })
-      } 
+      if (ask.userId !== order.userId) {
+        if (order.price + ask?.price === 10) {
+          const tradedQty = Math.min(order.quantity - executedQty, ask.quantity - ask.filled)
+          if (tradedQty === 0) continue
+  
+          executedQty += tradedQty
+          ask.filled += tradedQty
+  
+          fills.push({
+            price: ask.price,
+            qty: executedQty,
+            otherUserId: ask.otherUserId,
+            tradeId: uuidv4(),
+            marketOrderId: ask.orderId
+          })
+        } 
+      }
     }
     this.asks = this.asks.filter((ask) => ask.filled < ask.quantity)
     return {executedQty, fills}
@@ -116,21 +118,23 @@ export class Orderbook {
 
     for(let i = 0; i < this.bids.length && executedQty < order.quantity ; i++) {
       const bids = this.bids[i]
-      if(order.price + bids.price === 10) {
-        const tradedQty = Math.min(order.quantity - executedQty, bids.quantity)
-        if (tradedQty === 0) continue
-
-        executedQty += tradedQty
-        bids.filled = executedQty
-
-        fills.push({
-          price: bids.price,
-          qty: executedQty,
-          tradeId: uuidv4(),
-          otherUserId: bids.otherUserId,
-          marketOrderId: bids.orderId
-        })
-      }
+      if (bids.userId !== order.userId) {
+        if(order.price + bids.price === 10) {
+          const tradedQty = Math.min(order.quantity - executedQty, bids.quantity - bids.filled)
+          if (tradedQty === 0) continue
+  
+          executedQty += tradedQty
+          bids.filled += tradedQty
+  
+          fills.push({
+            price: bids.price,
+            qty: executedQty,
+            tradeId: uuidv4(),
+            otherUserId: bids.otherUserId,
+            marketOrderId: bids.orderId
+          })
+        }
+      } 
     }
     this.bids = this.bids.filter((bid) => bid.filled < bid.quantity)
 

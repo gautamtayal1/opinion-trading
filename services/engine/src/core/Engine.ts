@@ -12,7 +12,6 @@ interface UserBalance {
 }
 
 export const EXAMPLE_MARKET = "csk_to_win_ipl_2025"
-// const ENGINE_SNAPSHOT_PATH = path.resolve(__dirname, "../../../../shared-state/snapshot.json")
 const ENGINE_KEY = "engine/snapshot.json"
 
 export class Engine {
@@ -20,33 +19,7 @@ export class Engine {
   private orderbooks: Orderbook[] = []
   public static instance: Engine | null = null
 
-  constructor() {
-    // let snapshot = null
-    // try {
-    //   snapshot = fs.readFileSync(ENGINE_SNAPSHOT_PATH)
-    // } catch (error) {
-
-    // }
-    // if (snapshot) {
-    //   const parsedSnapshot = JSON.parse(snapshot.toString())
-    //   this.orderbooks = parsedSnapshot.orderbooks.map((book: any) => {
-    //     return new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
-    //   })
-    //   if (parsedSnapshot.balances && Array.isArray(parsedSnapshot.balances)) {
-    //     for (const [userId, balance] of parsedSnapshot.balances) {
-    //       this.balances.set(userId, balance);
-    //     }
-    //   }
-    // } else {
-    //   this.orderbooks = [new Orderbook
-    //     ([], [], EXAMPLE_MARKET, 1, 0)]
-    // }
-    // setInterval(() => {
-    //   this.saveSnapshot()
-    //   console.log("snapshot taken")
-    // }, 1000 * 120)
-  }
-
+  constructor() {}
 
 static async create() {
   const engine = new Engine();
@@ -270,7 +243,7 @@ static async create() {
     fills.forEach((fill: any) => {
       const balance = this.balances.get(userId)
       const totalCost = fill.price * fill.qty
-  
+      console.log("total cost: " + totalCost)
       this.balances.set(userId, {
         available: balance?.available || 0,
         locked: balance?.locked || 0 - totalCost
