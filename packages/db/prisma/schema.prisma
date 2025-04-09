@@ -12,9 +12,10 @@ model User {
   phoneNumber String   @unique
   balance     Int      @default(0)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   Payout      Payout[]
   orders      Order[]
+  OTP         OTP[] 
 }
 
 model Portfolio {
@@ -75,14 +76,17 @@ model Payout {
 }
 
 model OTP {
-  id         String   @id @default(uuid())
-  userId     String?
-  otp        String   @unique
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime
-  otpId      String   @unique
-  isVerified Boolean  @default(false)
+  id          String   @id @default(cuid())
+  code        String
+  phoneNumber String
+  isVerified  Boolean  @default(false)
+  expiresAt   DateTime
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  createdAt   DateTime @default(now())
 }
+
+
 
 enum EventStatus {
   ONGOING

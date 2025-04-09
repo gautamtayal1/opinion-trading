@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": ["REDIS_URL", "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_PHONE_NUMBER", "NEXTAUTH_URL", "NEXTAUTH_SECRET"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
