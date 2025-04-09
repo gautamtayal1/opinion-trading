@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
-import { use, useState } from 'react';
 
 export default function Navbar() {
   const {status} = useSession();

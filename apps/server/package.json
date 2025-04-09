@@ -11,13 +11,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
+    "@repo/db": "workspace: *",
     "@repo/order-queue": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.1",
+    "cors": "^2.8.5",
     "express": "^5.1.0",
-    "ts-node": "^10.9.2",
-    "@repo/db": "workspace: *"
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17"
   }
 }
