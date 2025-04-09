@@ -48,19 +48,20 @@ model Order {
   market    String
   price     Float
   quantity  Int
-  executedQty Int
+  executedQty Int?
   createdAt DateTime @default(now())
   user      User     @relation(references: [id], fields: [userId])
   userId    String
   status    OrderStatus @default(PENDING)
   trades    Trade[]
+  side      TradeSide
 }
 
 model Trade {
   id          String @id @default(cuid())
   orderId     String
   order       Order  @relation(references: [id], fields: [orderId])
-  executedQty Int
+  otherUserId String 
   quantity    Int
   price       Float
   eventSlug   String
@@ -106,5 +107,5 @@ enum PayoutStatus {
 
 enum OrderStatus {
   PENDING
-  PLACED
+  FILLED
 }

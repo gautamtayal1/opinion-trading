@@ -213,8 +213,8 @@ static async create() {
     const {executedQty, fills} = orderbook?.addOrder(order)
     console.log(executedQty, fills)
     this.updateBalance(userId, fills)
-    this.createRedisTrade(market, fills)
-    this.updateRedisOrder(order, executedQty, fills, market)
+    this.updateRedisOrder(order, executedQty, market)
+    this.createRedisTrade(market, fills, userId, order.side)
     this.publishDepth(market)
     this.publishTrade(fills, userId, market)
 
@@ -261,15 +261,20 @@ static async create() {
   }
   createRedisTrade(
     market: string, 
-    fills: any)
-    {
+    fills: any,
+    userId: string,
+    side: "yes" | "no"
+  ) {
     fills.forEach((fill: any) => {
       orderProcessor.add("new_trade",
         {
-        type: "TRADE_ADDED",
+        type: "FILLS_ADDED",
         data: {
-          market: market,
-          id: fill.tradeId.toString(),
+          orderId: fill.marketOrderId,
+          market,
+          userId,
+          side: side.toUpperCase(),
+          otherUserId: fill.otherUserId,
           price: fill.price,
           quantity: fill.qty,
           timestamp: Date.now()
@@ -281,31 +286,21 @@ static async create() {
   updateRedisOrder(
     order: MarketOrder, 
     executedQty: number, 
-    fills: Fill[], 
     market: string
   ) {
     orderProcessor.add("update_order", {
       type: "ORDER_UPDATE",
       data: {
+        userId: order.userId,
         orderId: order.orderId,
         executedQty: executedQty,
         price: order.price,
         market: market,
         quantity: order.quantity,
-        side: order.side
+        side: order.side.toUpperCase(),
+        isFilled: executedQty === order.quantity
       }
     })
-
-    fills.forEach((fill: any) => {
-      orderProcessor.add("fill_added", {
-        type: "ORDER_UPDATE",
-        data: {
-          orderId: fill.marketOrderId,
-          executedQty: fill.qty
-        }
-      })
-    });
-    console.log("updateRedisOrder: fills added")
   }
   publishDepth(
     market: string
