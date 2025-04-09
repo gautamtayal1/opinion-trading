@@ -27,16 +27,11 @@ model Portfolio {
 
 model Event {
   id          String   @id @default(cuid())
-  eventId     Int      @unique
   slug        String   @unique
   description String
   title       String
   start_date  DateTime
   end_date    DateTime
-  expiresAt   DateTime
-  min_bet     Float
-  max_bet     Float
-  quantity    Int
   sot         String
   status      EventStatus @default(ONGOING)
   traders     Int      @default(0)

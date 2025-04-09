@@ -1,22 +1,14 @@
-import { addToQueue } from "@repo/order-queue";
 import express from "express";
+import { orderRouter } from "./routes/ordersRoute";
+import { eventRouter } from "./routes/eventsRoute";
 
 const app = express()
 const PORT = 8080
 
 app.use(express.json())
 
-app.post("/order", async(req, res) => {
-  try {
-    console.log(req.body)
-    await addToQueue(req.body)
-    console.log("order submitted")
-    res.status(200).json({ message: "Order submitted successfully" })
-  } catch (error) {
-    console.log(error)
-    res.status(500).json({ error: "Failed to submit order" })
-  }
-})
+app.use("/order", orderRouter)
+app.use("/event", eventRouter)
 
 app.listen(PORT, () => {
   console.log("server running on port 8080")

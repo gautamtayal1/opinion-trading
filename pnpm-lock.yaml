@@ -26,6 +26,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@repo/db':
+        specifier: 'workspace: *'
+        version: link:../../packages/db
       '@repo/order-queue':
         specifier: workspace:*
         version: link:../../packages/order-queue
