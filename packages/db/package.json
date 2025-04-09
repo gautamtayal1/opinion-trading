@@ -15,5 +15,8 @@
     "@repo/typescript-config": "workspace:*",
     "dotenv": "^16.4.7",
     "prisma": "^6.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
   }
 }

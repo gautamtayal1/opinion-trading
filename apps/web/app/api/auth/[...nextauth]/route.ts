@@ -2,7 +2,6 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import prisma from '@repo/db/client'
 
-// Extend NextAuth types
 declare module "next-auth" {
   interface User {
     id: string;
@@ -38,8 +37,29 @@ const handler = NextAuth({
         const phone = credentials?.phoneNumber
         if (!phone) return null
 
+        const otp = await prisma.oTP.findFirst({
+          where: {
+            phoneNumber: phone,
+            isVerified: true,
+            expiresAt: { gt: new Date() },
+          },
+          orderBy: { createdAt: 'desc' },
+        })
+      
+        if (!otp) {
+          // No verified OTP → reject login
+          return null
+        }
+
         const user = await prisma.user.findUnique({
           where: { phoneNumber: phone },
+        })
+
+        if (!user) return null
+
+        await prisma.oTP.update({
+          where: { id: otp.id },
+          data: { isVerified: false },
         })
 
         return user ? { id: user.id, phoneNumber: user.phoneNumber, balance: user.balance } : null

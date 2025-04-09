@@ -2,8 +2,12 @@
 
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
+import { use, useState } from 'react';
 
 export default function Navbar() {
+  const {status} = useSession();
+
   return (
     <nav className="border-b border-purple-500/20 bg-[hsl(var(--background))]">
       <div className="container mx-auto px-4">
@@ -32,10 +36,22 @@ export default function Navbar() {
             >
               Portfolio
             </Link>
-            <button className="glow rounded-lg bg-[hsl(var(--primary))] px-4 py-2 font-medium text-white transition-all hover:bg-[hsl(var(--primary-hover))] hover:scale-105">
-              Sign Up
+            {status === 'unauthenticated' ? (
+            <Link href="/auth">
+            <button 
+              className="glow rounded-lg bg-[hsl(var(--primary))] px-4 py-2 font-medium text-white transition-all hover:bg-[hsl(var(--primary-hover))] hover:scale-105"
+              >
+              Sign In
             </button>
-            
+            </Link>
+            ) : (
+              <button 
+              className="glow rounded-lg bg-[hsl(var(--primary))] px-4 py-2 font-medium text-white transition-all hover:bg-[hsl(var(--primary-hover))] hover:scale-105"
+              onClick={() => signOut({callbackUrl: '/'})}
+              >
+                Sign Out
+              </button>
+            )}
           </div>
         </div>
       </div>
