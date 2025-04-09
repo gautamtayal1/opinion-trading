@@ -1,10 +1,8 @@
-import { Fill, MarketOrder, Orderbook } from "./Orderbook";
-import fs from "fs"
+import { Fill, MarketOrder, Orderbook } from "./Orderbook.js";
 import {v4 as uuidv4} from "uuid"
 import { RedisManager } from "@repo/order-queue";
-import path from "path";
 import { orderProcessor } from "@repo/order-queue";
-import { S3Manager } from "./S3Manager";
+import { S3Manager } from "./S3Manager.js";
 
 interface UserBalance {
   available: number;
@@ -327,7 +325,7 @@ static async create() {
     userId: string, 
     market: string) {
     fills.forEach((fill) => {
-      RedisManager.getInstance().publishToUser(`trade@${market}`, {
+      RedisManager.getInstance().publishToChannel(`trade@${market}`, {
         stream: `trade@${market}`,
         data: {
           e: `trade@${market}`,

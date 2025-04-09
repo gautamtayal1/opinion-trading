@@ -20,8 +20,8 @@ export function useWebSocket(url: string) {
       try {
         const data = JSON.parse(event.data)
         console.log(data)
-        if (data.event === "message" && data.channel) {
-          const handler = messageHandlers.current.get(data.channel)
+        if (data.stream) {
+          const handler = messageHandlers.current.get(data.stream)
           if(handler) {
             handler(data.data)
           }
