@@ -19,6 +19,15 @@ import prisma from "@repo/db/client";
         }
       })
     }
+
+    if(type === "ORDER_CANCELLED") {
+      await prisma.order.delete({
+        where: {
+          id: data.orderId
+        }
+      })
+    }
+
   
     if(type === "FILLS_ADDED") {
       await prisma.trade.create({

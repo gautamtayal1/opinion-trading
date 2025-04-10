@@ -78,6 +78,32 @@ export default function Portfolio() {
     fetchOrders();
   }, [userId]);
 
+  const handleCancelOrder = async(
+    quantity: number, 
+    market: string, 
+    price: number, 
+    executedQty: number, 
+    id: string
+  ) => {
+    console.log("handle cancel entered")
+    try {
+      console.log(id, userId)
+      const res = await axios.post("http://localhost:8080/order/cancel", {
+        userId: session?.user.id,
+        orderId: id,
+        market,
+        filled: executedQty, 
+        price: Number(price),
+        quantity: Number(quantity),
+        type: "CANCEL_ORDER"
+      })
+      console.log(res)
+      console.log("success")
+    } catch (error) {
+      console.log(error)
+    }
+    
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -175,9 +201,9 @@ export default function Portfolio() {
                     </td>
                     
                     <td>
-                      {['PENDING', 'FILLED'].includes(order.status) && (
+                      {(
                         <button className="rounded-lg bg-red-500/20 px-3 py-1 text-sm font-medium text-red-400 opacity-0 transition-all group-hover:opacity-100"
-                        onClick={handleCancelOrder}>
+                        onClick={() => handleCancelOrder(order.quantity, order.market, order.price, order.executedQty, order.id)}>
                           Cancel
                         </button>
                       )}

@@ -193,7 +193,6 @@ export class Orderbook {
       this.asks.splice(askIndex, 1)
       console.log("order cancelled")
     }
-    console.log("order/user not found")
   }
 
   getSnapshot () {

@@ -124,25 +124,19 @@ static async create() {
               remainingQty: 0
             }
           })
+
+          orderProcessor.add("cancel_order",
+            {
+            type: "ORDER_CANCELLED",
+            data: {
+              orderId: order.orderId
+            }
+          })
         } catch (error) {
+          console.log(order.userId)
           console.log(error + "error cancelling order")
         }
       break;
-
-      // case "GET_OPEN_ORDERS":
-      //   try {
-      //     const orderbook = this.orderbooks.find((book) => book.market === order.market)
-      //     if(!orderbook) return
-
-      //     const userOrders = orderbook.getOpenOrders(order.userId)
-      //     RedisManager.getInstance().publishToUser(order.userId, {
-      //       type: "OPEN_ORDERS",
-      //       payload: userOrders
-      //     })
-      //   } catch (error) {
-      //     console.log(error)
-      //   }
-      // break;
 
       case "ON_RAMP":
         const userId = order.userId
