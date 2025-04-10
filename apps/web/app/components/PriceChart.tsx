@@ -5,8 +5,8 @@ import { Area, AreaChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 
 const PriceChart = () => {
   const data = Array.from({ length: 30 }, (_, i) => ({
-    date: `2024-${String(i + 1).padStart(2, '0')}-01`,
-    price: 0.5 + Math.random() * 0.3,
+    date: new Date(2024, 0, 1, i).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+    price: (Math.random() * 10).toFixed(1),
   }));
   return (
     <div><div className="gradient-border card-shine rounded-xl bg-black/40 p-6">

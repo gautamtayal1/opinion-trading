@@ -36,7 +36,6 @@ static async create() {
   } else {
     engine.orderbooks = [new Orderbook([], [], EXAMPLE_MARKET, 1, 0)];
   }
-
   setInterval(() => engine.saveSnapshot(), 1000 * 3);
   return engine;
 }
@@ -71,15 +70,6 @@ static async create() {
             order.userId
           )
           console.log("createOrder: order placed")
-
-          RedisManager.getInstance().publishToUser(order.userId, {
-            type: "ORDER_PLACED",
-            payload: {
-              executedQty,
-              fills,
-              orderId
-            }
-          })
           
           RedisManager.getInstance().publishToUser(order.userId, {
             type: "ORDER_PLACED",
@@ -89,7 +79,6 @@ static async create() {
               orderId
             }
           })
-          console.log("publishToUser: order placed")
         } catch (error) {
           RedisManager.getInstance().publishToUser(order.userId, {
             type: "ORDER_CANCELLED",
@@ -99,7 +88,6 @@ static async create() {
               orderId: ""
             }
           })
-          console.log("publishToUser: order cancelled", error)
         }
       break;
 
@@ -119,7 +107,7 @@ static async create() {
           }
 
           orderbook.cancelOrder(order.orderId, order.userId)
-          const remainingQuantity = order.quantity - order.filled  //TODO - filled not assigned on order, given after the order is created - recheck the logic
+          const remainingQuantity = order.quantity - order.filled
 
           const balance = this.balances.get(order.userId)
           if (balance) {
@@ -141,20 +129,20 @@ static async create() {
         }
       break;
 
-      case "GET_OPEN_ORDERS":
-        try {
-          const orderbook = this.orderbooks.find((book) => book.market === order.market)
-          if(!orderbook) return
+      // case "GET_OPEN_ORDERS":
+      //   try {
+      //     const orderbook = this.orderbooks.find((book) => book.market === order.market)
+      //     if(!orderbook) return
 
-          const userOrders = orderbook.getOpenOrders(order.userId)
-          RedisManager.getInstance().publishToUser(order.userId, {
-            type: "OPEN_ORDERS",
-            payload: userOrders
-          })
-        } catch (error) {
-          console.log(error)
-        }
-      break;
+      //     const userOrders = orderbook.getOpenOrders(order.userId)
+      //     RedisManager.getInstance().publishToUser(order.userId, {
+      //       type: "OPEN_ORDERS",
+      //       payload: userOrders
+      //     })
+      //   } catch (error) {
+      //     console.log(error)
+      //   }
+      // break;
 
       case "ON_RAMP":
         const userId = order.userId
@@ -162,23 +150,8 @@ static async create() {
         this.onRamp(userId, amount)
       break;
 
-      case "GET_DEPTH":
-        try {
-          const orderbook = this.orderbooks.find((book) => book.market === order.market)
-          if(!orderbook) return 
-
-          RedisManager.getInstance().publishToUser(order.userId, {
-            type: "DEPTH",
-            payload: orderbook.getMarketDepth()
-          })
-        } catch (error) {
-          console.log(error)
-        }
-      break;
-
       default:
         console.log("unknown order type: ", order.type)
-
     }
   }
   addOrderbook(orderbook: Orderbook) {
@@ -215,7 +188,7 @@ static async create() {
     this.createRedisTrade(market, fills, userId, order.side)
     this.updateRedisDepth(market)
     this.publishDepth(market)
-    this.publishTrade(fills, userId, market)
+    this.publishTrade(fills, market)
 
     console.log("createOrder: order created")
     return { executedQty, fills, orderId }
@@ -329,7 +302,6 @@ static async create() {
     if(!orderbook) {
       return ("orderbook not found")
     }
-
     const {bid, ask, currentPrice} = orderbook.getMarketDepth()
     orderProcessor.add("update_depth", {
       type: "DEPTH_UPDATE",
@@ -342,18 +314,16 @@ static async create() {
     })
   }
   publishTrade(
-    fills: Fill[], 
-    userId: string, 
+    fills: Fill[],  
     market: string) {
     fills.forEach((fill) => {
-      RedisManager.getInstance().publishToChannel(`trade@${market}`, {
-        stream: `trade@${market}`,
+      console.log("other user id: " + fill.otherUserId)
+      RedisManager.getInstance().publishToChannel(`fill@${fill.otherUserId}`, {
+        stream: `fill@${fill.otherUserId}`,
         data: {
-          e: `trade@${market}`,
-          t: fill.tradeId,
-          p: fill.price,
+          e: `fill@${fill.otherUserId}`,
+          t: fill.marketOrderId,
           q: fill.qty.toString(),
-          s: market
         }
       })
     })
@@ -393,5 +363,3 @@ static async create() {
     })
   }
 }
-
-

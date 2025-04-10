@@ -32,8 +32,6 @@ import prisma from "@repo/db/client";
         }
       })
 
-      
-
       console.log("fill added")
       await prisma.order.update({
         where: {

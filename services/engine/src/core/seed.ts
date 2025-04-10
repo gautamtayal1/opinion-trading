@@ -4,10 +4,7 @@ import { Engine } from "./Engine.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-
-const seedOrderbook = async() => {
-  console.log("S3 BUCKET =", process.env.S3_BUCKET_NAME);
-
+const createOrderbook = (market: string) => {
   const bids: any[] = [
     {
       price: 5,
@@ -45,16 +42,35 @@ const seedOrderbook = async() => {
       userId: "user4"
     }
   ];
-  const orderbook = new Orderbook(bids, asks, "BTC-INR", 1, 50000);
-  const engine = await Engine.create()
-  Engine.instance = engine
-  engine.addOrderbook(orderbook)
 
-
-  console.log("=== Orderbook Seeded ===");
-  console.log("Bids:", orderbook.bids);
-  console.log("Asks:", orderbook.asks);
-  console.log("Market Depth:", orderbook.getMarketDepth());
+  return new Orderbook(bids, asks, market, 1, 50000);
 };
 
-seedOrderbook();
+const seedOrderbooks = async() => {
+  console.log("S3 BUCKET =", process.env.S3_BUCKET_NAME);
+
+  // Create engine instance
+  const engine = await Engine.create();
+  Engine.instance = engine;
+
+  // Create and add each orderbook
+  const markets = [
+    "ind-vs-pak-wc",
+    "btc-halving-2024",
+    "iphone16-launch",
+    "us-pres-debate-2024",
+    "eth-dencun-upgrade",
+    "superbowl-lviii"
+  ];
+
+  for (const market of markets) {
+    const orderbook = createOrderbook(market);
+    engine.addOrderbook(orderbook);
+    console.log(`=== Orderbook Seeded for ${market} ===`);
+    console.log("Market Depth:", orderbook.getMarketDepth());
+  }
+
+  console.log("All orderbooks seeded successfully");
+};
+
+seedOrderbooks();

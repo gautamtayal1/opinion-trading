@@ -1,3 +1,4 @@
+import prisma from "@repo/db/client"
 import { addToQueue } from "@repo/order-queue"
 import { Router } from "express"
 
@@ -9,6 +10,20 @@ orderRouter.post("/create", async(req, res) => {
     await addToQueue(req.body)
     console.log("order submitted")
     res.status(200).json({ message: "Order submitted successfully" })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ error: "Failed to submit order" })
+  }
+})
+
+orderRouter.post("/user", async(req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        userId: req.body.userId
+      }
+    })
+    res.status(200).json({ message: "Order submitted successfully", orders: orders })
   } catch (error) {
     console.log(error)
     res.status(500).json({ error: "Failed to submit order" })

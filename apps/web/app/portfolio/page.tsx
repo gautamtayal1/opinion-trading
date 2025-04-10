@@ -1,59 +1,91 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
-import { Calendar, TrendingUp, ArrowUp, ArrowDown, X, AlertCircle, CheckCircle2 } from 'lucide-react';
-
-// Mock data for user's orders
-const userOrders = [
-  {
-    id: 1,
-    eventTitle: "Bitcoin Price Q4 2024",
-    category: "Crypto",
-    type: "YES",
-    price: 0.68,
-    quantity: 1000,
-    filled: 800,
-    status: "partial", // "filled", "partial", "pending", "cancelled"
-    date: "2024-03-15",
-    icon: TrendingUp,
-  },
-  {
-    id: 2,
-    eventTitle: "US Election 2024",
-    category: "Politics",
-    type: "NO",
-    price: 0.45,
-    quantity: 500,
-    filled: 500,
-    status: "filled",
-    date: "2024-03-14",
-    icon: TrendingUp,
-  },
-  {
-    id: 3,
-    eventTitle: "Tesla Stock Performance",
-    category: "Stocks",
-    type: "YES",
-    price: 0.72,
-    quantity: 300,
-    filled: 0,
-    status: "pending",
-    date: "2024-03-16",
-    icon: TrendingUp,
-  },
-];
+import { Calendar, CheckCircle2 } from 'lucide-react';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
+import { useWebSocket } from '../hooks/useWebSockets';
 
 export default function Portfolio() {
-  const [activeTab, setActiveTab] = useState('all'); // 'all', 'active', 'filled'
+
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  const [orders, setOrders] = useState<any[]>([]);
+  const {isConnected, subscribe, unsubscribe} = useWebSocket('ws://localhost:8081')
+  
+  useEffect(() => {
+
+    const handler = (data: any) => {
+      try {
+        const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+        console.log('Parsed WebSocket data:', parsedData);
+    
+        const { q, t } = parsedData;
+    
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === t
+              ? {
+                  ...order,
+                  executedQty: order.executedQty + Number(q),
+                }
+              : order
+          )
+        );
+      } catch (error) {
+        console.error('Error parsing WebSocket data:', error);
+      }
+    };
+    
+    console.log('Attempting to subscribe to fill channel');
+    const isConnected = subscribe(`fill@${userId}`, handler);
+    console.log('Subscription result:', isConnected);
+
+    if (!isConnected) {
+      console.warn('WebSocket not ready, scheduling retry in 500ms');
+      const retry = setTimeout(() => {
+        console.log('Retrying WebSocket subscription');
+        subscribe(`fill@${userId}`, handler);
+      }, 500);
+
+      return () => {
+        console.log('Clearing WebSocket retry timeout');
+        clearTimeout(retry);
+      };
+    }
+
+    return () => {
+      console.log('Cleaning up WebSocket subscription');
+      unsubscribe(`fill@${userId}`);
+    };
+  }, [isConnected, subscribe, unsubscribe, userId]);
+
+  useEffect(() => {
+    const fetchOrders = async() => {
+      try {
+        const response = await axios.post("http://localhost:8080/order/user", {
+          userId
+        }, {
+          withCredentials: true
+        });
+        setOrders(response.data.orders || []);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+        setOrders([]);
+      }
+    }
+    fetchOrders();
+  }, [userId]);
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'filled':
+      case 'FILLED':
         return 'text-green-400';
       case 'partial':
         return 'text-yellow-400';
-      case 'pending':
+      case 'PENDING':
         return 'text-blue-400';
       case 'cancelled':
         return 'text-red-400';
@@ -62,32 +94,9 @@ export default function Portfolio() {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'filled':
-        return 'Filled';
-      case 'partial':
-        return 'Partially Filled';
-      case 'pending':
-        return 'Pending';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
-  };
-
-  const filteredOrders = userOrders.filter(order => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'active') return ['pending', 'partial'].includes(order.status);
-    if (activeTab === 'filled') return order.status === 'filled';
-    return true;
-  });
-
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
       <Navbar />
-      
       <main className="container mx-auto px-4 py-16">
         <div className="mb-12">
           <h1 className="mb-4 text-4xl font-bold">My Portfolio</h1>
@@ -97,9 +106,8 @@ export default function Portfolio() {
         {/* Portfolio Stats */}
         <div className="mb-12 grid gap-6 md:grid-cols-3">
           {[
-            { label: 'Total Value', value: '$12,450.00' },
-            { label: 'Active Positions', value: '8' },
-            { label: 'Realized P/L', value: '+$2,830.00' },
+            { label: 'Orders', value: orders.length },
+            { label: 'Wallet', value: '₹2000' },
           ].map((stat, index) => (
             <div key={index} className="gradient-border card-shine rounded-xl bg-black/40 p-6">
               <p className="text-sm text-[hsl(var(--muted))]">{stat.label}</p>
@@ -110,99 +118,72 @@ export default function Portfolio() {
 
         {/* Orders Table */}
         <div className="gradient-border card-shine rounded-xl bg-black/40 p-6">
-          {/* Tabs */}
-          <div className="mb-6 flex space-x-4">
-            {[
-              { id: 'all', label: 'All Orders' },
-              { id: 'active', label: 'Active' },
-              { id: 'filled', label: 'Filled' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-purple-500/20 text-purple-400'
-                    : 'text-[hsl(var(--muted))] hover:bg-purple-500/10 hover:text-purple-400'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-purple-500/20 text-left text-sm text-[hsl(var(--muted))]">
                   <th className="pb-4">Event</th>
-                  <th className="pb-4">Type</th>
+                  <th className="pb-4">Side</th>
                   <th className="pb-4">Price</th>
                   <th className="pb-4">Quantity</th>
                   <th className="pb-4">Filled</th>
                   <th className="pb-4">Status</th>
-                  <th className="pb-4">Date</th>
                   <th className="pb-4">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-purple-500/10">
-                {filteredOrders.map((order) => {
-                  const Icon = order.icon;
-                  return (
-                    <tr key={order.id} className="group">
-                      <td className="py-4">
+                {orders.map((order) => (
+                  <tr key={order.id} className="group">
+                    <td className="py-4">
                         <div className="flex items-center gap-3">
                           <div className="rounded-lg bg-purple-500/20 p-2 text-purple-400">
-                            <Icon className="h-4 w-4" />
                           </div>
                           <div>
-                            <p className="font-medium">{order.eventTitle}</p>
-                            <p className="text-sm text-[hsl(var(--muted))]">{order.category}</p>
+                            <p className="font-medium">{order.market}</p>
                           </div>
                         </div>
-                      </td>
-                      <td>
-                        <span className={`rounded-full px-3 py-1 text-sm font-medium ${
-                          order.type === 'YES' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                        }`}>
-                          {order.type}
-                        </span>
-                      </td>
-                      <td className="font-medium">${order.price.toFixed(2)}</td>
-                      <td>{order.quantity.toLocaleString()}</td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-16 overflow-hidden rounded-full bg-purple-500/20">
-                            <div
-                              className="h-full bg-purple-500"
-                              style={{ width: `${(order.filled / order.quantity) * 100}%` }}
-                            />
-                          </div>
-                          <span className="text-sm text-[hsl(var(--muted))]">
-                            {((order.filled / order.quantity) * 100).toFixed(0)}%
-                          </span>
+                    </td>
+                    <td>
+                      <span className={`rounded-full px-3 py-1 text-sm font-medium ${
+                        order.side === 'YES' ? 'bg-green-500' : 'bg-red-500'
+                      }`}>
+                        {order.type}
+                      </span>
+                    </td>
+                    <td className="font-medium">₹{order.price.toFixed(1)}</td>
+                    <td>{order.quantity.toLocaleString()}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-16 overflow-hidden rounded-full bg-purple-500/20">
+                          <div
+                            className="h-full bg-purple-500"
+                            style={{ width: `${(order.executedQty / order.quantity) * 100}%` }}
+                          />
                         </div>
-                      </td>
-                      <td>
-                        <span className={`flex items-center gap-1 ${getStatusColor(order.status)}`}>
-                          {order.status === 'filled' && <CheckCircle2 className="h-4 w-4" />}
-                          {order.status === 'partial' && <AlertCircle className="h-4 w-4" />}
-                          {order.status === 'pending' && <Calendar className="h-4 w-4" />}
-                          {getStatusText(order.status)}
+                        <span className="text-sm text-[hsl(var(--muted))]">
+                        {`${((order.executedQty / order.quantity) * 100).toFixed(0)}%`}
+                        
                         </span>
-                      </td>
-                      <td className="text-[hsl(var(--muted))]">{order.date}</td>
-                      <td>
-                        {['pending', 'partial'].includes(order.status) && (
-                          <button className="rounded-lg bg-red-500/20 px-3 py-1 text-sm font-medium text-red-400 opacity-0 transition-all hover:bg-red-500/30 group-hover:opacity-100">
-                            Cancel
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`flex items-center gap-1 ${getStatusColor(order.quantity === order.executedQty ? "FILLED" : "PENDING")}`}>
+                        {order.quantity === order.executedQty ? <CheckCircle2 className="h-4 w-4" />: <Calendar className="h-4 w-4" /> }
+                        {order.quantity === order.executedQty ? "FILLED" : "PENDING"}
+                      </span>
+                    </td>
+                    
+                    <td>
+                      {['PENDING', 'FILLED'].includes(order.status) && (
+                        <button className="rounded-lg bg-red-500/20 px-3 py-1 text-sm font-medium text-red-400 opacity-0 transition-all group-hover:opacity-100"
+                        onClick={handleCancelOrder}>
+                          Cancel
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
