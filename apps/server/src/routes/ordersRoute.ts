@@ -1,14 +1,12 @@
 import prisma from "@repo/db/client"
 import { addToQueue } from "@repo/order-queue"
-import { Router } from "express"
+import { Router, Request, Response } from "express"
 
 const orderRouter: Router = Router()
 
-orderRouter.post("/create", async(req, res) => {
+orderRouter.post("/create", async(req: Request, res: Response) => {
   try {
-    console.log(req.body)
     await addToQueue(req.body)
-    console.log("order submitted")
     res.status(200).json({ message: "Order submitted successfully" })
   } catch (error) {
     console.log(error)

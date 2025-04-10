@@ -21,20 +21,17 @@ export class Orderbook {
   bids: any[];
   asks: any[];
   market: string;
-  lastTradeId: number;
   currentPrice: number;
 
   constructor(
     bids: any[] = [],
     asks: any[] = [],
     market: string = "",
-    lastTradeId: number = 1,
     currentPrice: number = UNIT_VALUE / 2
   ) {
     this.bids = bids;
     this.asks = asks;
     this.market = market;
-    this.lastTradeId = lastTradeId;
     this.currentPrice = currentPrice;
 
     this.sortOrder()
@@ -200,7 +197,6 @@ export class Orderbook {
       bids: this.bids,
       asks: this.asks,
       market: this.market,
-      lastTradeId: this.lastTradeId,
       currentPrice: this.currentPrice
     };
   }

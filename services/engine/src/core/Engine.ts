@@ -9,8 +9,7 @@ interface UserBalance {
   locked: number;
 }
 
-export const EXAMPLE_MARKET = "csk_to_win_ipl_2025"
-const ENGINE_KEY = "engine/snapshot.json"
+const ENGINE_KEY = "snapshot.json"
 
 export class Engine {
   private balances: Map<String, UserBalance> = new Map()
@@ -25,7 +24,7 @@ static async create() {
 
   if (snapshot) {
     engine.orderbooks = snapshot.orderbooks.map((book: any) =>
-      new Orderbook(book.bids, book.asks, book.market, book.lastTradeId, book.currentPrice)
+      new Orderbook(book.bids, book.asks, book.market, book.currentPrice)
     );
 
     if (snapshot.balances && Array.isArray(snapshot.balances)) {
@@ -34,9 +33,9 @@ static async create() {
       }
     }
   } else {
-    engine.orderbooks = [new Orderbook([], [], EXAMPLE_MARKET, 1, 0)];
+    engine.orderbooks = [new Orderbook([], [], "csk_to_win_ipl_2025", 0)];
   }
-  setInterval(() => engine.saveSnapshot(), 1000 * 3);
+  setInterval(() => engine.saveSnapshot(), 1000 * 2);
   return engine;
 }
 
@@ -61,32 +60,17 @@ static async create() {
       case "CREATE_ORDER":
         try {
 
-          const { fills, executedQty , orderId } = this.createOrder(
+          this.createOrder(
             order.market,
             order.price,
             order.quantity,
             order.side,
             order.userId
           )
-          console.log("createOrder: order placed")
+       
           
-          RedisManager.getInstance().publishToUser(order.userId, {
-            type: "ORDER_PLACED",
-            payload: {
-              executedQty,
-              fills,
-              orderId
-            }
-          })
         } catch (error) {
-          RedisManager.getInstance().publishToUser(order.userId, {
-            type: "ORDER_CANCELLED",
-            payload: {
-              executedQty: 0,
-              fills: null,
-              orderId: ""
-            }
-          })
+          console.log(error)
         }
       break;
 
@@ -326,14 +310,7 @@ static async create() {
     })
     console.log("trade published")
   }
-  // setBaseBalance(userId: string) {
-  //   if(!this.balances.has(userId)) {
-  //     this.balances.set(userId, {
-  //       available: 1000000,
-  //       locked: 0
-  //     })
-  //   }
-  // }
+
   onRamp(userId: string, amount:number) {
     const existingBalance = this.balances.get(userId)
     this.balances.set(userId, {
