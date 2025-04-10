@@ -1,5 +1,5 @@
 
-import { orderQueue } from "./bullQueue";
+import { orderQueue } from "./bullQueue.js";
 
 export const addToQueue = async(order: any)  => {
   try {

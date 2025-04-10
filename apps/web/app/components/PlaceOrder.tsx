@@ -108,7 +108,7 @@ const PlaceOrder = () => {
           {/* Price Input */}
           <div className="mb-6">
             <label className="mb-2 block text-sm text-[hsl(var(--muted))]">
-              Price (0.1-10)
+              Price (1-10)
             </label>
             <div 
               className="flex w-full items-center rounded-lg border border-purple-500/20 bg-black/20 text-white outline-none focus-within:border-purple-500/50"
@@ -116,7 +116,7 @@ const PlaceOrder = () => {
               <button
                 className="px-3 py-3 hover:text-purple-400 text-xl"
                 onClick={() => {
-                  const newPrice = Math.max(0.1, Number(price) - 0.1);
+                  const newPrice = Math.max(1, Number(price) - 0.5);
                   setPrice(newPrice.toFixed(1));
                 }}
               >
@@ -144,7 +144,7 @@ const PlaceOrder = () => {
               <button
                 className="px-3 py-3 hover:text-purple-400 text-xl"
                 onClick={() => {
-                  const newPrice = Math.min(10, Number(price) + 0.1);
+                  const newPrice = Math.min(10, Number(price) + 0.5);
                   setPrice(newPrice.toFixed(1));
                 }}
               >

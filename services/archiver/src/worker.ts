@@ -28,7 +28,17 @@ import prisma from "@repo/db/client";
       })
     }
 
-  
+    if(type === "UPDATE_BALANCE") {
+      await prisma.user.update({
+        where: {
+          id: data.userId
+        },
+        data: {
+          balance: data.balance
+        }
+      })
+    }
+
     if(type === "FILLS_ADDED") {
       await prisma.trade.create({
         data: {

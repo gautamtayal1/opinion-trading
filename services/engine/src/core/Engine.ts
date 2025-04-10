@@ -56,8 +56,7 @@ static async create() {
   }
   processOrder(order: any) {
     console.log("hello from engine")
-    this.setBaseBalance(order.userId)
-    
+    console.log(order)
     switch(order.type){
       case "CREATE_ORDER":
         try {
@@ -114,6 +113,7 @@ static async create() {
             balance.available += remainingQuantity * order.price
             balance.locked -= remainingQuantity * order.price
             this.publishDepthForCancel(order.price.toString(), market)
+            this.updateRedisBalance(order.userId)
           }
 
           RedisManager.getInstance().publishToUser(order.userId, {
@@ -139,6 +139,8 @@ static async create() {
       break;
 
       case "ON_RAMP":
+        console.log("on ramp")
+        console.log(order)
         const userId = order.userId
         const amount = Number(order.amount)
         this.onRamp(userId, amount)
@@ -150,8 +152,7 @@ static async create() {
   }
   addOrderbook(orderbook: Orderbook) {
     this.orderbooks.push(orderbook)
-    orderbook.asks.forEach((ask: any) => this.setBaseBalance(ask.userId))
-    orderbook.bids.forEach((bid: any) => this.setBaseBalance(bid.userId))
+
   }
   createOrder(
     market: string,
@@ -216,6 +217,7 @@ static async create() {
         available: otherUserBal?.available || 0,
         locked: (otherUserBal?.locked || 0) - (fill.price * fill.qty)
       })
+      this.updateRedisBalance(fill.otherUserId)
     })
     
     const currentBalance = this.balances.get(userId) || { available: 0, locked: 0 }
@@ -223,6 +225,7 @@ static async create() {
       available: currentBalance.available,
       locked: currentBalance.locked - totalCost
     })
+    this.updateRedisBalance(userId)
     console.log("updateBalance: balance updated")
   }
   createRedisTrade(
@@ -323,20 +326,21 @@ static async create() {
     })
     console.log("trade published")
   }
-  setBaseBalance(userId: string) {
-    if(!this.balances.has(userId)) {
-      this.balances.set(userId, {
-        available: 1000000,
-        locked: 0
-      })
-    }
-  }
+  // setBaseBalance(userId: string) {
+  //   if(!this.balances.has(userId)) {
+  //     this.balances.set(userId, {
+  //       available: 1000000,
+  //       locked: 0
+  //     })
+  //   }
+  // }
   onRamp(userId: string, amount:number) {
     const existingBalance = this.balances.get(userId)
     this.balances.set(userId, {
-      available: existingBalance?.available || 0 + amount,
+      available: (existingBalance?.available || 0) + amount,
       locked: existingBalance?.locked || 0
     })
+    this.updateRedisBalance(userId)
   }
   publishDepthForCancel(price: string, market: string) {
     const orderbook = this.orderbooks.find((book) => book.market === market)
@@ -353,6 +357,17 @@ static async create() {
         b: updatedBids.length ? updatedBids : [[price, "0"]],
         e: "depth",
         cp: currentPrice
+      }
+    })
+  }
+  
+  updateRedisBalance(userId: string) {
+    const balance = this.balances.get(userId)
+    orderProcessor.add("update_balance", {
+      type: "UPDATE_BALANCE",
+      data: {
+        userId,
+        balance: balance?.available
       }
     })
   }

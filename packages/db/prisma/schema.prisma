@@ -10,20 +10,11 @@ datasource db {
 model User {
   id          String   @id @default(cuid())
   phoneNumber String   @unique
-  balance     Int      @default(0)
+  balance     Int      @default(20)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  Payout      Payout[]
   orders      Order[]
   OTP         OTP[]
-}
-
-model Portfolio {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  currentBalances Float    @default(0.0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
 }
 
 model Event {
@@ -65,15 +56,7 @@ model Trade {
   side        TradeSide
 }
 
-model Payout {
-  id        String       @id @default(cuid())
-  userId    String
-  amount    Float
-  status    PayoutStatus
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  user      User         @relation(fields: [userId], references: [id])
-}
+
 
 model OTP {
   id          String   @id @default(cuid())

@@ -13,6 +13,8 @@ export default function Portfolio() {
   const userId = session?.user?.id;
   const [orders, setOrders] = useState<any[]>([]);
   const {isConnected, subscribe, unsubscribe} = useWebSocket('ws://localhost:8081')
+  const [balance, setBalance] = useState<number>(0)
+  const [inputValue, setInputValue] = useState<number>(10)
   
   useEffect(() => {
 
@@ -105,20 +107,63 @@ export default function Portfolio() {
     
   }
 
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!session?.user.id) {
+        console.warn('No user session found');
+        return;
+      }
+
+      try {
+        console.log('Fetching balance for user:', session.user.id);
+        const res = await axios.post("http://localhost:8080/balance", {
+          userId: session.user.id
+        }, {
+          withCredentials: true
+        });
+        
+        if (res.data?.balance !== undefined) {
+          setBalance(res.data.balance);
+        } else {
+          console.warn('No balance data received from server');
+        }
+      } catch (error) {
+        console.error('Failed to fetch balance:', error);
+      }
+    };
+
+    fetchBalance();
+  }, [session?.user.id]);
+  const [showInput, setShowInput] = useState(false);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'FILLED':
         return 'text-green-400';
-      case 'partial':
-        return 'text-yellow-400';
       case 'PENDING':
         return 'text-blue-400';
-      case 'cancelled':
-        return 'text-red-400';
       default:
         return 'text-[hsl(var(--muted))]';
     }
   };
+
+  const addBalance = async() => {
+    if(inputValue < 0) return
+    try {
+      console.log(session?.user.id)
+      const res = await axios.post("http://localhost:8080/balance/add", {
+        type: "ON_RAMP",
+        userId: session?.user.id,
+        amount: inputValue
+    }, {
+      withCredentials: true
+    })
+    console.log(res)
+    setShowInput(false);
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -133,14 +178,44 @@ export default function Portfolio() {
         <div className="mb-12 grid gap-6 md:grid-cols-3">
           {[
             { label: 'Orders', value: orders.length },
-            { label: 'Wallet', value: '₹2000' },
+            { label: 'Wallet', value: `₹${balance}` },
           ].map((stat, index) => (
             <div key={index} className="gradient-border card-shine rounded-xl bg-black/40 p-6">
               <p className="text-sm text-[hsl(var(--muted))]">{stat.label}</p>
               <p className="text-2xl font-bold">{stat.value}</p>
             </div>
           ))}
-        </div>
+          <div className="gradient-border card-shine rounded-xl bg-black/40 p-6 mr-10 pt-10"> 
+
+            <div className="w-full">
+            {showInput ? (
+            <div className="w-full flex items-center gap-2 mb-4">
+              <input
+                type="number"
+                placeholder="Enter amount"
+                className="flex-1 rounded-lg border border-purple-500/30 bg-black/20 p-2 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={inputValue}
+                onChange={(e) => setInputValue(Number(e.target.value))}
+              />
+              <button
+                onClick={addBalance}
+                className="rounded-lg bg-purple-700 hover:bg-purple-500/70 px-4 py-2 text-sm font-medium text-white transition-colors"
+              >
+                Add
+              </button>
+            </div>
+          ) : (
+            <button
+              className="w-full p-2 rounded-lg bg-purple-800 hover:bg-purple-500/30 transition-colors duration-200 mb-4 border border-purple-500/30 shadow-lg shadow-purple-500/10 flex items-center justify-center"
+              onClick={() => setShowInput(true)}
+            >
+              <p className="text-sm text-white font-medium">Add Balance</p>
+            </button>
+          )}
+            </div>
+           </div>
+          </div>
+            
 
         {/* Orders Table */}
         <div className="gradient-border card-shine rounded-xl bg-black/40 p-6">
@@ -201,7 +276,7 @@ export default function Portfolio() {
                     </td>
                     
                     <td>
-                      {(
+                      {order.quantity !== order.executedQty && (
                         <button className="rounded-lg bg-red-500/20 px-3 py-1 text-sm font-medium text-red-400 opacity-0 transition-all group-hover:opacity-100"
                         onClick={() => handleCancelOrder(order.quantity, order.market, order.price, order.executedQty, order.id)}>
                           Cancel
