@@ -34,6 +34,20 @@ eventRouter.delete("/delete", async(req, res) => {
   }
 })
 
+eventRouter.post("/slug", async(req, res) => {
+  try {
+    const event = await prisma.event.findUnique({
+      where: {
+        slug: req.body.slug
+      }
+    })
+    res.status(200).json({ event })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ error: "Failed to submit order" })
+  }
+})
+
 eventRouter.patch("/update", async(req, res) => {
   try {
     const { id } = req.body

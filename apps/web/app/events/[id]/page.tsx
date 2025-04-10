@@ -8,23 +8,24 @@ import PlaceOrder from "../../components/PlaceOrder";
 import Navbar from "../../components/Navbar";
 import Orderbook from "../../components/Orderbook";
 import PriceChart from "../../components/PriceChart";
+import axios from "axios";
 
 export default function Home() {
   console.log("Component rendered");
   
-  const { messages, isConnected, subscribe, unsubscribe } = useWebSocket('ws://localhost:8081');
-  const [marketDepth, setMarketDepth] = useState<any[]>([]);
+  const { isConnected, subscribe, unsubscribe } = useWebSocket('ws://localhost:8081');
+  const [marketDepth, setMarketDepth] = useState([]);
+  const [marketInit, setMarketInit] = useState([])
   const param = useParams();
-  console.log("Params from useParams:", param);
   
   const market = param.id as string;
-  console.log("Market value:", market);
   useEffect(() => {
     if (!market || !isConnected) return;
   
     const handler = (data: any) => {
       try {
         const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+        console.log(parsedData);
         setMarketDepth(parsedData);
       } catch (err) {
         console.error("Error parsing market depth:", err);
@@ -45,7 +46,17 @@ export default function Home() {
     return () => {
       unsubscribe(`depth@${market}`);
     };
-  }, [isConnected, market]);
+  }, [isConnected, subscribe, unsubscribe, market]);
+
+  useEffect(() => {
+    const fetchDepth = async () => {
+      const res = await axios.post("http://localhost:8080/depth", {
+        eventSlug: market
+      },)
+      setMarketInit(res.data)
+    }
+    fetchDepth()
+  }, [])
   
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -55,11 +66,11 @@ export default function Home() {
           {/* Left Column (2/3 width) */}
           <div className="lg:col-span-2 space-y-8">
             {/* Event Details */}
-            <EventDetails />
+            <EventDetails slug={market} />
             {/* Price Chart */}
             <PriceChart />
             {/* Order Book */}
-            <Orderbook />
+            <Orderbook depthSocket={marketDepth} depthInit={marketInit}/>
           </div>
           {/* Place Order */}
           <PlaceOrder />

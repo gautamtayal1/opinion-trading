@@ -1,5 +1,4 @@
 import { Worker } from "bullmq";
-import {RedisManager} from "@repo/order-queue"
 import prisma from "@repo/db/client";
 
 ;(async() => {
@@ -32,6 +31,9 @@ import prisma from "@repo/db/client";
           otherUserId: data.otherUserId,
         }
       })
+
+      
+
       console.log("fill added")
       await prisma.order.update({
         where: {
@@ -43,6 +45,45 @@ import prisma from "@repo/db/client";
         }
       })
       console.log("fill updated")
+    }
+
+    if(type === "DEPTH_UPDATE") {
+      console.log("depth update", data)
+      try {
+        // First check if a record exists
+        const existingDepth = await prisma.depth.findFirst({
+          where: {
+            eventSlug: data.eventSlug
+          }
+        });
+        
+        if (existingDepth) {
+          // Update if exists
+          await prisma.depth.update({
+            where: { id: existingDepth.id },
+            data: {
+              bids: data.bids,
+              asks: data.asks,
+              currentPrice: data.currentPrice
+            }
+          });
+          console.log("Updated existing depth record:", existingDepth.id);
+        } else {
+          // Create new record
+          const newDepth = await prisma.depth.create({
+            data: {
+              eventSlug: data.eventSlug,
+              bids: data.bids,
+              asks: data.asks,
+              currentPrice: data.currentPrice
+            }
+          });
+          console.log("Created new depth record:", newDepth.id);
+        }
+        console.log("depth operation completed successfully")
+      } catch (error) {
+        console.error("Failed to update depth:", error)
+      }
     }
   }, {
     connection: {

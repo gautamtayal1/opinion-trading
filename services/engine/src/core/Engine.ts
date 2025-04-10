@@ -213,6 +213,7 @@ static async create() {
     this.updateBalance(userId, fills)
     this.updateRedisOrder(order, executedQty, market)
     this.createRedisTrade(market, fills, userId, order.side)
+    this.updateRedisDepth(market)
     this.publishDepth(market)
     this.publishTrade(fills, userId, market)
 
@@ -319,6 +320,26 @@ static async create() {
       }
     })
     console.log("depth published")
+  }
+
+  updateRedisDepth(
+    market: string
+  ) {
+    const orderbook = this.orderbooks.find((book) => book.market === market)
+    if(!orderbook) {
+      return ("orderbook not found")
+    }
+
+    const {bid, ask, currentPrice} = orderbook.getMarketDepth()
+    orderProcessor.add("update_depth", {
+      type: "DEPTH_UPDATE",
+      data: {
+        bids: bid,
+        asks: ask,
+        currentPrice: currentPrice,
+        eventSlug: market
+      }
+    })
   }
   publishTrade(
     fills: Fill[], 

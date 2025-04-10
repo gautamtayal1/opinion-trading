@@ -15,7 +15,7 @@ model User {
   updatedAt   DateTime @updatedAt
   Payout      Payout[]
   orders      Order[]
-  OTP         OTP[] 
+  OTP         OTP[]
 }
 
 model Portfolio {
@@ -27,41 +27,41 @@ model Portfolio {
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String      @id @default(cuid())
+  slug        String      @unique
   description String
   title       String
   start_date  DateTime
   end_date    DateTime
   sot         String
   status      EventStatus @default(ONGOING)
-  traders     Int      @default(0)
+  traders     Int         @default(0)
   trades      Trade[]
 }
 
 model Order {
-  id        String   @id
-  market    String
-  price     Float
-  quantity  Int
+  id          String      @id
+  market      String
+  price       Float
+  quantity    Int
   executedQty Int?
-  createdAt DateTime @default(now())
-  user      User     @relation(references: [id], fields: [userId])
-  userId    String
-  status    OrderStatus @default(PENDING)
-  trades    Trade[]
-  side      TradeSide
+  createdAt   DateTime    @default(now())
+  user        User        @relation(references: [id], fields: [userId])
+  userId      String
+  status      OrderStatus @default(PENDING)
+  trades      Trade[]
+  side        TradeSide
 }
 
 model Trade {
-  id          String @id @default(cuid())
+  id          String    @id @default(cuid())
   orderId     String
-  order       Order  @relation(references: [id], fields: [orderId])
-  otherUserId String 
+  order       Order     @relation(references: [id], fields: [orderId])
+  otherUserId String
   quantity    Int
   price       Float
   eventSlug   String
-  event       Event  @relation(references: [slug], fields: [eventSlug])
+  event       Event     @relation(references: [slug], fields: [eventSlug])
   side        TradeSide
 }
 
@@ -86,7 +86,14 @@ model OTP {
   createdAt   DateTime @default(now())
 }
 
-
+model Depth {
+  id           String   @id @default(cuid())
+  eventSlug    String   @unique
+  bids         Json
+  asks         Json
+  currentPrice Int
+  createdAt    DateTime @default(now())
+}
 
 enum EventStatus {
   ONGOING
