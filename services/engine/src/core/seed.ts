@@ -1,6 +1,6 @@
-import { Orderbook } from "./Orderbook";
+import { Orderbook } from "./Orderbook.js";
 import { v4 as uuidv4 } from "uuid";
-import { Engine } from "./Engine";
+import { Engine } from "./Engine.js";
 import dotenv from "dotenv";
 dotenv.config();
 

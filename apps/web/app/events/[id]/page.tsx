@@ -15,7 +15,7 @@ export default function Home() {
   
   const { isConnected, subscribe, unsubscribe } = useWebSocket('ws://localhost:8081');
   const [marketDepth, setMarketDepth] = useState([]);
-  const [marketInit, setMarketInit] = useState([])
+  const [marketInit, setMarketInit] = useState({ currentPrice: 5, bids: [], asks: [] });
   const param = useParams();
   
   const market = param.id as string;
@@ -73,7 +73,7 @@ export default function Home() {
             <Orderbook depthSocket={marketDepth} depthInit={marketInit}/>
           </div>
           {/* Place Order */}
-          <PlaceOrder />
+          <PlaceOrder/>
         </div>
       </main>
     </div>

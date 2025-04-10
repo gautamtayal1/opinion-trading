@@ -9,9 +9,9 @@ const PORT = 8080
 
 app.use(express.json())
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: true,
   credentials: true,  
-}))
+}, ))
 
 app.use("/order", orderRouter)
 app.use("/event", eventRouter)

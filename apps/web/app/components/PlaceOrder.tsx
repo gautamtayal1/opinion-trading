@@ -1,31 +1,76 @@
 "use client"
 
 import React, { useState } from 'react'
-import { ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowUp, ArrowDown, CheckCircle2, AlertCircle } from 'lucide-react'
+import axios from 'axios'
+import { useSession } from 'next-auth/react'
+import { useParams } from 'next/navigation'
 
 const PlaceOrder = () => {
   const [betType, setBetType] = useState<'yes' | 'no'>('yes')
-  const [price, setPrice] = useState('0.65')
-  const [quantity, setQuantity] = useState('100')
+  const [price, setPrice] = useState('5.0')
+  const [quantity, setQuantity] = useState('1')
   const [orderStatus, setOrderStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  
+  const { data: session } = useSession()
+  const params = useParams()
+  const market = params.id as string
 
-  const handlePlaceOrder = () => {
-    // Fake async request
+  const handlePlaceOrder = async() => {
     try {
-      const success = Math.random() > 0.3 // 70% success chance
-      if (success) {
-        setOrderStatus('success')
-      } else {
-        throw new Error('Order failed')
-      }
-    } catch {
-      setOrderStatus('error')
-    }
-
-    // Optionally reset after some time
-    setTimeout(() => {
       setOrderStatus('idle')
-    }, 4000)
+      const response = await axios.post("http://localhost:8080/order/create", 
+        {
+          userId: session?.user.id,
+          market,
+          price: Number(price),
+          quantity: Number(quantity),
+          side: betType,
+          type: "CREATE_ORDER"
+        }, {
+          withCredentials: true
+        }
+      )
+      
+      console.log('Order response:', response.data)
+      setOrderStatus('success')
+
+    } catch (error) {
+      setOrderStatus('error')
+      console.error('Order placement failed:', error)
+    }
+  }
+
+  if (orderStatus === 'success') {
+    return (
+      <div className="lg:col-span-1">
+        <div className="gradient-border card-shine sticky top-24 rounded-xl bg-black/40 p-6">
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <CheckCircle2 className="h-16 w-16 text-green-500" />
+            <h2 className="text-xl font-bold">Order Submitted</h2>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (orderStatus === 'error') {
+    return (
+      <div className="lg:col-span-1">
+        <div className="gradient-border card-shine sticky top-24 rounded-xl bg-black/40 p-6">
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <AlertCircle className="h-16 w-16 text-red-500" />
+            <h2 className="text-xl font-bold">Order Failed</h2>
+            <button
+              onClick={() => setOrderStatus('idle')}
+              className="mt-4 rounded-xl bg-[hsl(var(--primary))] px-6 py-2 font-semibold transition-all hover:bg-[hsl(var(--primary-hover))]"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -159,7 +204,7 @@ const PlaceOrder = () => {
             <div className="flex items-center justify-between text-sm text-[hsl(var(--muted))]">
               <span>Total Cost</span>
               <span className="text-lg font-bold text-white">
-                ${(Number(price) * Number(quantity)).toFixed(2)}
+              ₹{(Number(price) * Number(quantity)).toFixed(2)}
               </span>
             </div>
           </div>
@@ -171,21 +216,6 @@ const PlaceOrder = () => {
           >
             Place Order
           </button>
-
-          {/* Status Message */}
-          {orderStatus !== 'idle' && (
-            <div
-              className={`mt-4 rounded-lg p-3 text-sm font-medium ${
-                orderStatus === 'success'
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-red-500/20 text-red-400'
-              }`}
-            >
-              {orderStatus === 'success'
-                ? '✅ Order placed successfully!'
-                : '❌ Unable to place the order. Please try again.'}
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -31,10 +31,10 @@ const Orderbook = ({depthSocket, depthInit}: {depthSocket: any, depthInit: any})
                 <div>
                   <h3 className="mb-3 text-lg font-semibold text-green-400">YES Orders</h3>
                   <div className="space-y-2">
-                    {orderBook.yes.map((order, i) => (
+                    {orderBook.yes.map((order: any, i: any) => (
                       <div key={i} className="flex items-center justify-between rounded-lg bg-green-500/10 p-3">
                         <span className="font-medium text-green-400">₹{order.price}</span>
-                        <span className="text-[hsl(var(--muted))]">{order.quantity} orders</span>
+                        <span className="text-[hsl(var(--muted))]">{order.quantity} qty</span>
                       </div>
                     ))}
                   </div>
@@ -42,10 +42,10 @@ const Orderbook = ({depthSocket, depthInit}: {depthSocket: any, depthInit: any})
                 <div>
                   <h3 className="mb-3 text-lg font-semibold text-red-400">NO Orders</h3>
                   <div className="space-y-2">
-                    {orderBook.no.map((order, i) => (
+                    {orderBook.no.map((order: any, i: any) => (
                       <div key={i} className="flex items-center justify-between rounded-lg bg-red-500/10 p-3">
                         <span className="font-medium text-red-400">₹{order.price}</span>
-                        <span className="text-[hsl(var(--muted))]">{order.quantity} orders</span>
+                        <span className="text-[hsl(var(--muted))]">{order.quantity} qty</span>
                       </div>
                     ))}
                   </div>
