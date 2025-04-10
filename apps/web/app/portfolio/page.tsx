@@ -97,8 +97,8 @@ export default function Portfolio() {
         quantity: Number(quantity),
         type: "CANCEL_ORDER"
       })
-      console.log(res)
-      console.log("success")
+
+      setOrders(prev => prev.filter(order => order.id !== id))
     } catch (error) {
       console.log(error)
     }
