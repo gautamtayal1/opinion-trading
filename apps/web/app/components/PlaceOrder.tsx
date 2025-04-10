@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { ArrowUp, ArrowDown, CheckCircle2, AlertCircle } from 'lucide-react'
 import axios from 'axios'
-import { useSession } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { useParams } from 'next/navigation'
 
 const PlaceOrder = () => {
@@ -17,6 +17,9 @@ const PlaceOrder = () => {
   const market = params.id as string
 
   const handlePlaceOrder = async() => {
+    if(!session?.user.id) {
+      return signIn()
+    }
     try {
       setOrderStatus('idle')
       const response = await axios.post("http://localhost:8080/order/create", 

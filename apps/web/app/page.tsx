@@ -1,5 +1,3 @@
-'use client';
-
 import { ArrowRight, Sparkles, Zap, BarChart3, Shield } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Link from 'next/link';
@@ -32,13 +30,13 @@ export default function Home() {
             </div>
 
             {/* Market Preview */}
-            <div className="mt-20 w-full max-w-4xl">
+              <Link href="/events/btc-halving-2024" className="mt-20 w-full max-w-4xl">
               <div className="gradient-border card-shine rounded-2xl bg-black/40 p-8 backdrop-blur">
                 <div className="mb-6 flex items-center justify-between">
                   <h3 className="text-2xl font-bold">Featured Market</h3>
                   <span className="rounded-full bg-purple-500/20 px-4 py-1 text-sm text-purple-400">Live</span>
                 </div>
-                <p className="mb-6 text-xl font-medium">Will BTC hit $100K by 2025?</p>
+                <p className="mb-6 text-xl font-medium">Bitcoin Halving Event 2024</p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <button className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-green-500/20 to-green-500/10 p-6 text-left transition-all hover:scale-[1.02]">
                     <div className="mb-2 text-2xl font-bold text-green-400">YES</div>
@@ -52,13 +50,14 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-            </div>
+            
+            </Link>
           </div>
         </header>
       </div>
 
       {/* Features */}
-      <section className="py-32">
+      <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-4xl font-bold">Why Choose Probably</h2>
@@ -97,67 +96,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Live Markets */}
-      <section className="py-32">
-        <div className="container mx-auto px-4">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl font-bold">Live Markets</h2>
-            <p className="text-[hsl(var(--muted))]">Real-time prediction opportunities</p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: 'Tesla Stock Price',
-                question: 'Will TSLA reach $300 by Q2 2024?',
-                yes: '72%',
-                no: '28%',
-                category: 'Stocks',
-                volume: '$1.2M',
-              },
-              {
-                title: 'Ethereum 2.0',
-                question: 'ETH 2.0 launch before July 2024?',
-                yes: '85%',
-                no: '15%',
-                category: 'Crypto',
-                volume: '$3.4M',
-              },
-              {
-                title: 'Apple AR',
-                question: 'Apple AR glasses release in 2024?',
-                yes: '45%',
-                no: '55%',
-                category: 'Tech',
-                volume: '$890K',
-              },
-            ].map((market, index) => (
-              <div
-                key={index}
-                className="card-shine gradient-border group rounded-xl bg-black/40 p-6 transition-all hover:scale-[1.02]"
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="rounded-full bg-purple-500/20 px-3 py-1 text-sm text-purple-400">
-                    {market.category}
-                  </span>
-                  <span className="text-sm text-[hsl(var(--muted))]">Vol: {market.volume}</span>
-                </div>
-                <h3 className="mb-4 text-xl font-bold">{market.title}</h3>
-                <p className="mb-6 text-[hsl(var(--muted))]">{market.question}</p>
-                <div className="grid gap-3">
-                  <div className="flex items-center justify-between rounded-lg bg-green-500/10 p-3">
-                    <span className="font-medium text-green-400">YES</span>
-                    <span className="text-lg font-bold text-green-400">{market.yes}</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-red-500/10 p-3">
-                    <span className="font-medium text-red-400">NO</span>
-                    <span className="text-lg font-bold text-red-400">{market.no}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* CTA */}
       <section className="py-32">
