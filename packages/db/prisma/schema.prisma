@@ -10,7 +10,7 @@ datasource db {
 model User {
   id          String   @id @default(cuid())
   phoneNumber String   @unique
-  balance     Int      @default(20)
+  balance     Int      @default(1000)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   orders      Order[]
@@ -55,8 +55,6 @@ model Trade {
   event       Event     @relation(references: [slug], fields: [eventSlug])
   side        TradeSide
 }
-
-
 
 model OTP {
   id          String   @id @default(cuid())
