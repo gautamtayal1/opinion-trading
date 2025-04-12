@@ -1,7 +1,6 @@
 import { Fill, MarketOrder, Orderbook } from "./Orderbook.js";
 import {v4 as uuidv4} from "uuid"
-import { RedisManager } from "@repo/order-queue";
-import { orderProcessor } from "@repo/order-queue";
+import { RedisManager, orderProcessor } from "@repo/infra";
 import { S3Manager } from "./S3Manager.js";
 
 interface UserBalance {

@@ -17,7 +17,7 @@ export default async function Events() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {events.map((event) => {
+          {events.map((event: any) => {
             return (
               <div
                 key={event.id}

@@ -1,5 +1,5 @@
 {
-  "name": "@repo/engine",
+  "name": "@repo/infra",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -7,20 +7,15 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "seed": "tsx src/core/seed.ts"
+    "build": "tsc -b"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.782.0",
     "@repo/typescript-config": "workspace:*",
-    "dotenv": "^16.4.7",
-    "uuid": "^11.1.0",
-    "@repo/infra": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/node": "^22.13.10"
+    "bullmq": "^5.47.1",
+    "redis": "^4.7.0"
   }
 }

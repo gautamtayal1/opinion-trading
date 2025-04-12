@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"
   },
   "scripts": {
     "dev": "tsx src/index.ts",
-    "worker": "tsx src/queue/worker.ts"
+    "worker": "tsx src/queue/worker.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

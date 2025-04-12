@@ -183,6 +183,18 @@ importers:
         specifier: ^8.29.0
         version: 8.29.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
 
+  packages/infra:
+    dependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      bullmq:
+        specifier: ^5.47.1
+        version: 5.47.1
+      redis:
+        specifier: ^4.7.0
+        version: 4.7.0
+
   packages/order-queue:
     dependencies:
       '@repo/engine':
@@ -200,12 +212,6 @@ importers:
       redis:
         specifier: ^4.7.0
         version: 4.7.0
-
-  packages/types:
-    dependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
 
   packages/typescript-config: {}
 
@@ -263,9 +269,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.782.0
         version: 3.782.0
-      '@repo/order-queue':
+      '@repo/infra':
         specifier: workspace:*
-        version: link:../../packages/order-queue
+        version: link:../../packages/infra
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -276,9 +282,6 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
     devDependencies:
-      '@repo/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@types/node':
         specifier: ^22.13.10
         version: 22.13.10
