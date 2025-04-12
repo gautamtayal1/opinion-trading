@@ -133,12 +133,6 @@ const PlaceOrder = () => {
                     setPrice(e.target.value);
                   }
                 }}
-                onWheel={(e) => {
-                  e.preventDefault();
-                  const delta = e.deltaY > 0 ? -0.1 : 0.1;
-                  const newPrice = Math.min(10, Math.max(0.1, Number(price) + delta));
-                  setPrice(newPrice.toFixed(1));
-                }}
                 step="0.1"
                 min="0.1"
                 max="10"
@@ -180,12 +174,6 @@ const PlaceOrder = () => {
                   if (val >= 1) {
                     setQuantity(e.target.value);
                   }
-                }}
-                onWheel={(e) => {
-                  e.preventDefault();
-                  const delta = e.deltaY > 0 ? -1 : 1;
-                  const newQuantity = Math.max(1, Number(quantity) + delta);
-                  setQuantity(newQuantity.toString());
                 }}
                 min="1"
                 className="w-full bg-transparent text-center outline-none"

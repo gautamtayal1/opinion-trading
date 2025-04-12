@@ -37,19 +37,28 @@ const handler = NextAuth({
         const phone = credentials?.phoneNumber
         if (!phone) return null
 
-        const otp = await prisma.oTP.findFirst({
-          where: {
-            phoneNumber: phone,
-            isVerified: true,
-            expiresAt: { gt: new Date() },
-          },
-          orderBy: { createdAt: 'desc' },
-        })
+        // const otp = await prisma.oTP.findFirst({
+        //   where: {
+        //     phoneNumber: phone,
+        //     isVerified: true,
+        //     expiresAt: { gt: new Date() },
+        //   },
+        //   orderBy: { createdAt: 'desc' },
+        // })
       
-        if (!otp) {
-          // No verified OTP → reject login
-          return null
+        // if (!otp) {
+        //   return null
+        // }
+
+        //auth bypass for demo-user
+        if (phone === '1234') {
+          return {
+            id: 'demo-user',
+            phoneNumber: '1234',
+            balance: 1000
+          }
         }
+      
 
         const user = await prisma.user.findUnique({
           where: { phoneNumber: phone },
@@ -57,10 +66,10 @@ const handler = NextAuth({
 
         if (!user) return null
 
-        await prisma.oTP.update({
-          where: { id: otp.id },
-          data: { isVerified: false },
-        })
+        // await prisma.oTP.update({
+        //   where: { id: otp.id },
+        //   data: { isVerified: false },
+        // })
 
         return user ? { id: user.id, phoneNumber: user.phoneNumber, balance: user.balance } : null
       },
