@@ -10,6 +10,10 @@
       "default": "./dist/index.js"
     }
   },
+  "scripts": {
+    "build": "tsc",
+    "generate": "prisma generate"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
