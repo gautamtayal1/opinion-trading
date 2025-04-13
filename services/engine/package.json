@@ -7,7 +7,8 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "seed": "tsx src/core/seed.ts"
+    "seed": "tsx src/core/seed.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

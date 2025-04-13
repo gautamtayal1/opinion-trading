@@ -13,6 +13,7 @@ COPY . .
 
 RUN pnpm install --frozen-lockfile
 
+RUN pnpm --filter engine build
 RUN pnpm --filter order-queue build
 
 WORKDIR /app/services/engine
