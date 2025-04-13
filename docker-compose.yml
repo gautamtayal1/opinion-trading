@@ -35,6 +35,18 @@ services:
       - REDIS_URL=redis://probo-redis:6379
       - DATABASE_URL=postgresql://probo:probo123@probo-postgres:5432/probodb
 
+  order-queue:
+    build:
+      context: .
+      dockerfile: packages/order-queue/Dockerfile
+    container_name: probo-order-queue
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=probo-redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://probo-redis:6379
+    command: pnpm worker
   postgres:
     image: postgres:15
     container_name: probo-postgres
