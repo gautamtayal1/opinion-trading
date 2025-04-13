@@ -47,6 +47,20 @@ services:
       - REDIS_PORT=6379
       - REDIS_URL=redis://probo-redis:6379
     command: pnpm worker
+
+  archiver:
+    build: 
+      context: .
+      dockerfile: services/archiver/Dockerfile
+    container_name: probo-archiver
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - REDIS_HOST=probo-redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://probo-redis:6379
+      - DATABASE_URL=postgresql://probo:probo123@probo-postgres:5432/probodb
   postgres:
     image: postgres:15
     container_name: probo-postgres
