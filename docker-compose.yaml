@@ -20,3 +20,33 @@ services:
       - REDIS_HOST=probo-redis
       - REDIS_PORT=6379
       - REDIS_URL=redis://probo-redis:6379
+      - DATABASE_URL=postgresql://probo:probo123@probo-postgres:5432/probodb
+  web: 
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: probo-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - REDIS_URL=redis://probo-redis:6379
+      - DATABASE_URL=postgresql://probo:probo123@probo-postgres:5432/probodb
+
+  postgres:
+    image: postgres:15
+    container_name: probo-postgres
+    restart: always
+    ports: 
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=probo
+      - POSTGRES_PASSWORD=probo123
+      - POSTGRES_DB=probodb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -1,9 +1,9 @@
-
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import { Calendar } from 'lucide-react';
-
 import prisma from '@repo/db/client';
+
+export const dynamic = "force-dynamic"
 
 export default async function Events() {
   const events = await prisma.event.findMany()
