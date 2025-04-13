@@ -15,5 +15,8 @@
     "@types/ws": "^8.18.1",
     "redis": "^4.7.0",
     "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24"
   }
 }

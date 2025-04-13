@@ -101,11 +101,11 @@ import prisma from "@repo/db/client";
       } catch (error) {
         console.error("Failed to update depth:", error)
       }
-    }
+    } 
   }, {
     connection: {
-      host: "localhost",
-      port: 6379
+      host: process.env.REDIS_HOST || "probo-redis",
+      port: Number(process.env.REDIS_PORT) ||   6379
     }
   })
 

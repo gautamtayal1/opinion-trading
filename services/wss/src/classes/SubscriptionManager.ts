@@ -8,7 +8,9 @@ export class SubscriptionManager {
   private redisClient: RedisClientType
 
   private constructor() {
-    this.redisClient = createClient()
+    this.redisClient = createClient({
+      url: process.env.REDIS_URL || 'redis://probo-redis:6379'
+    })
     this.redisClient.connect()
   }
 

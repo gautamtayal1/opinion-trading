@@ -5,7 +5,9 @@ export class SubscriberManager {
   private static instance: SubscriberManager
 
   constructor() {
-    this.client = createClient()
+    this.client = createClient({
+      url: process.env.REDIS_URL || 'redis://probo-redis:6379'
+    })
     this.client.connect()
     console.log("connected to redis")
   }

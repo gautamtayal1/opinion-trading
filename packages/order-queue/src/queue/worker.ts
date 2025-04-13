@@ -15,8 +15,8 @@ dotenv.config({ path: "./.env" });
     },
     {
       connection:{
-        host: "localhost",
-        port: 6379
+        host: process.env.REDIS_HOST || "probo-redis",
+        port: Number(process.env.REDIS_PORT) || 6379
       }
     }
   )

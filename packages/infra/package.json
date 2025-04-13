@@ -17,5 +17,8 @@
     "@repo/typescript-config": "workspace:*",
     "bullmq": "^5.47.1",
     "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24"
   }
 }
