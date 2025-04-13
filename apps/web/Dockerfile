@@ -1,13 +1,21 @@
 FROM node:20-alpine
 
-WORKDIR /app
+RUN apk add --no-cache openssl
 
-COPY . .
+WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+COPY turbo.json ./
+
+COPY . .
+
 RUN pnpm install --frozen-lockfile
 
+RUN pnpm --filter db build
 RUN pnpm --filter db exec prisma generate
 RUN pnpm --filter web build
 
