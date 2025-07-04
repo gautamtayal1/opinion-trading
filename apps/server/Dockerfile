@@ -8,10 +8,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 RUN pnpm install --frozen-lockfile
 
-RUN pnpm --filter @repo/db build \
-    && pnpm --filter @repo/order-queue build \
-    && pnpm --filter @repo/db exec prisma generate \
-    && pnpm --filter @repo/server build
+RUN pnpm --filter @repo/db exec prisma generate
+RUN pnpm --filter @repo/server... build
 
 WORKDIR /app/apps/server
 
