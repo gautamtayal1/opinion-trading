@@ -17,8 +17,6 @@ RUN pnpm --filter infra build
 RUN pnpm --filter engine build
 RUN pnpm --filter order-queue build
 
-WORKDIR /app/services/engine
-
-CMD ["pnpm", "worker"]
+CMD ["pnpm", "--filter", "order-queue", "worker"]
 
 

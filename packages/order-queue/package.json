@@ -8,7 +8,9 @@
   },
   "scripts": {
     "dev": "tsx src/index.ts",
-    "worker": "tsx src/queue/worker.ts",
+    "dev:worker": "tsx src/queue/worker.ts",
+    "worker": "node dist/queue/worker.js",
+    "start": "node dist/index.js",
     "build": "tsc"
   },
   "keywords": [],
