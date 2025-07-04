@@ -1,8 +1,14 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 
-const REGION = process.env.AWS_REGION!;
-const s3 = new S3Client({ region: REGION });
+const s3 = new S3Client({
+  region:           process.env.AWS_REGION,
+  endpoint:         process.env.S3_ENDPOINT,
+  credentials: {
+    accessKeyId:     process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+  }
+});
 
 export const S3Manager = {
   async uploadSnapshot(snapshot: object, key: string) {
@@ -35,7 +41,6 @@ export const S3Manager = {
   },
 };
 
-// helper
 const streamToString = (stream: Readable): Promise<string> =>
   new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
