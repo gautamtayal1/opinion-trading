@@ -2,7 +2,10 @@
   "name": "archiver",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
@@ -17,5 +20,10 @@
     "bullmq": "^5.47.1",
     "@repo/order-queue": "workspace:*",
     "@repo/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "tsx": "^4.7.0",
+    "typescript": "^5.8.2"
   }
 }
