@@ -12,7 +12,7 @@ export default function Portfolio() {
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const [orders, setOrders] = useState<any[]>([]);
-  const {isConnected, subscribe, unsubscribe} = useWebSocket(`ws://${process.env.NEXT_PUBLIC_WSS_URL}`)
+  const {isConnected, subscribe, unsubscribe} = useWebSocket(`ws://35.188.12.120:8081`)
   const [balance, setBalance] = useState<number>(0)
   const [inputValue, setInputValue] = useState<number>(10)
   
@@ -66,7 +66,7 @@ export default function Portfolio() {
   useEffect(() => {
     const fetchOrders = async() => {
       try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/order/user`, {
+        const response = await axios.post(`http://35.188.12.120:8080/order/user`, {
           userId
         }, {
           withCredentials: true
@@ -90,7 +90,7 @@ export default function Portfolio() {
     console.log("handle cancel entered")
     try {
       console.log(id, userId)
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/order/cancel`, {
+      const res = await axios.post(`http://35.188.12.120:8080/order/cancel`, {
         userId: session?.user.id,
         orderId: id,
         market,
@@ -116,7 +116,7 @@ export default function Portfolio() {
 
       try {
         console.log('Fetching balance for user:', session.user.id);
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/balance`, {
+        const res = await axios.post(`http://35.188.12.120:8080/balance`, {
           userId: session.user.id
         }, {
           withCredentials: true
@@ -151,7 +151,7 @@ export default function Portfolio() {
     if(inputValue < 0) return
     try {
       console.log(session?.user.id)
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/balance/add`, {
+      const res = await axios.post(`http://35.188.12.120:8080/balance/add`, {
         type: "ON_RAMP",
         userId: session?.user.id,
         amount: inputValue
