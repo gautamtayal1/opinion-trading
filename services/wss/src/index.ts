@@ -1,5 +1,5 @@
 import {WebSocketServer} from "ws"
-import { UserManager } from "./classes/UserManager"
+import { UserManager } from "./classes/UserManager.js"
 
 const wss = new WebSocketServer({port: 8081})
 

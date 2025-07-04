@@ -1,5 +1,5 @@
 import {createClient, RedisClientType} from "redis"
-import { UserManager } from "./UserManager"
+import { UserManager } from "./UserManager.js"
 
 export class SubscriptionManager {
   private static instance: SubscriptionManager

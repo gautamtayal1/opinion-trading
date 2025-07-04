@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { SubscriptionManager } from "./SubscriptionManager";
+import { SubscriptionManager } from "./SubscriptionManager.js";
 
 export class User {
   private id: string;
