@@ -17,7 +17,7 @@ const EventDetails = ({slug}: {slug: string}) => {
 
   useEffect(() => {
     const getEvent = async() => {
-        const res = await axios.post("http://localhost:8080/event/slug", {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/event/slug`, {
         slug
       }, {
         withCredentials: true,

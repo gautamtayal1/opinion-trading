@@ -13,7 +13,7 @@ import axios from "axios";
 export default function Home() {
   console.log("Component rendered");
   
-  const { isConnected, subscribe, unsubscribe } = useWebSocket('ws://localhost:8081');
+  const { isConnected, subscribe, unsubscribe } = useWebSocket(`ws://${process.env.NEXT_PUBLIC_WSS_URL}`);
   const [marketDepth, setMarketDepth] = useState([]);
   const [marketInit, setMarketInit] = useState({ currentPrice: 5, bids: [], asks: [] });
   const param = useParams();
@@ -50,7 +50,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchDepth = async () => {
-      const res = await axios.post("http://localhost:8080/depth", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/depth`, {
         eventSlug: market
       },)
       setMarketInit(res.data)

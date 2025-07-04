@@ -22,7 +22,7 @@ const PlaceOrder = () => {
     }
     try {
       setOrderStatus('idle')
-      const response = await axios.post("http://localhost:8080/order/create", 
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/order/create`, 
         {
           userId: session?.user.id,
           market,
