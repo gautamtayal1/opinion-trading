@@ -145,8 +145,13 @@ static async create() {
     userId: string
   ) {
     console.log("hello from createOrder")
-    const orderbook = this.orderbooks.find((book) => book.market === market)
-    if(!orderbook) throw new Error("orderbook not found")
+    let orderbook = this.orderbooks.find((book) => book.market === market)
+    // If the market does not yet exist in the snapshot, create a fresh orderbook on the fly
+    if(!orderbook) {
+      console.log(`Creating new orderbook for market: ${market}`)
+      orderbook = new Orderbook([], [], market, price)
+      this.addOrderbook(orderbook)
+    }
 
     this.checkAndLockFunds(userId, quantity, price)
 
